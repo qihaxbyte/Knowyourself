@@ -6,7 +6,7 @@ import { type AllResults, type CategoryResult, computeMBTI } from "../scoring";
 import { getCategoryInsight, getGuideComment, type CategoryInsight } from "../insights";
 import ShareCard from "./share-card";
 import SoulResonance from "./soul-resonance";
-import html2canvas from "html2canvas";
+import { toPng } from "html-to-image";
 import type { Gender } from "../flow";
 
 export default function Hasil({ guideId, selectedCats, guideMatches, answers, categoryResults, gender, onRestart, onChat, onShare }: { guideId: string; selectedCats: string[]; guideMatches: GuideMatch[]; answers: QuizAnswers; categoryResults: AllResults; gender: Gender | null; onRestart: () => void; onChat: (id?: string) => void; onShare: () => void }) {
@@ -33,12 +33,14 @@ export default function Hasil({ guideId, selectedCats, guideMatches, answers, ca
     if (!cardRef.current) return;
     setIsExporting(true);
     try {
-      const canvas = await html2canvas(cardRef.current, {
-        scale: 2,
-        backgroundColor: "#FAF7F0",
+      const dataUrl = await toPng(cardRef.current, {
+        pixelRatio: 2,
+        cacheBust: true,
+        style: { margin: "0" }
       });
       
-      canvas.toBlob(async (blob) => {
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
         if (!blob) {
           setIsExporting(false);
           return;
@@ -64,10 +66,9 @@ export default function Hasil({ guideId, selectedCats, guideMatches, answers, ca
           }
         } else {
           // Fallback to auto download for PC
-          fallbackDownload(canvas, fileName);
+          fallbackDownload(dataUrl, fileName);
         }
         setIsExporting(false);
-      }, "image/png");
       
     } catch (err) {
       console.error("Gagal memproses gambar", err);
@@ -75,8 +76,7 @@ export default function Hasil({ guideId, selectedCats, guideMatches, answers, ca
     }
   };
 
-  const fallbackDownload = (canvas: HTMLCanvasElement, fileName: string) => {
-    const dataUrl = canvas.toDataURL("image/png");
+  const fallbackDownload = (dataUrl: string, fileName: string) => {
     const link = document.createElement("a");
     link.download = fileName;
     link.href = dataUrl;

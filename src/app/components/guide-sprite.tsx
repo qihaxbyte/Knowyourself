@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { GUIDES } from "../flow";
 import angelImg from "../../imports/Angel.png";
 import barbarianImg from "../../imports/Barbarian.png";
@@ -41,24 +40,8 @@ export function GuideSprite({
 }) {
   const src = GUIDE_SPRITES[guideId];
   const guide = GUIDES.find((g) => g.id === guideId);
-  const isSingle = SINGLE_IMAGES.includes(guideId);
-  
-  // Convert to Base64 to prevent Safari canvas tainting in html-to-image
-  const [base64Src, setBase64Src] = useState<string>("");
-
-  useEffect(() => {
-    if (!src) return;
-    fetch(src)
-      .then((res) => res.blob())
-      .then((blob) => {
-        const reader = new FileReader();
-        reader.onloadend = () => setBase64Src(reader.result as string);
-        reader.readAsDataURL(blob);
-      })
-      .catch((err) => console.error("Failed to convert GuideSprite to base64", err));
-  }, [src]);
-
   if (!src) return null;
+  const isSingle = SINGLE_IMAGES.includes(guideId);
 
   const dur = 1.6;
 
@@ -73,7 +56,7 @@ export function GuideSprite({
     >
       <img
         className="m-[0px] rounded-[0px]"
-        src={base64Src || src}
+        src={src}
         alt={guide?.name ?? guideId}
         draggable={false}
         style={{

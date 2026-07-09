@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { X, Download, Share2, Image, Palette, User, Sparkles, Check, ChevronLeft, ChevronRight, Crown } from "lucide-react";
 import { GUIDES, CATEGORIES, type Gender, GUIDE_BG } from "../flow";
 import { GuideSprite } from "./guide-sprite";
@@ -61,25 +61,6 @@ type ShareCardProps = {
   gender: Gender | null;
 };
 
-// ──────────────────────────────────────────────
-// HOOK FOR SAFARI BASE64 CONVERSION
-// ──────────────────────────────────────────────
-function useBase64Image(url: string | null) {
-  const [base64, setBase64] = useState<string>("");
-  useEffect(() => {
-    if (!url) return;
-    fetch(url)
-      .then((res) => res.blob())
-      .then((blob) => {
-        const reader = new FileReader();
-        reader.onloadend = () => setBase64(reader.result as string);
-        reader.readAsDataURL(blob);
-      })
-      .catch((err) => console.error("Failed to fetch base64 image", err));
-  }, [url]);
-  return base64 || url;
-}
-
 export default function ShareCard({ guideId, bestGuideId, categoryResults, selectedCats, gender }: ShareCardProps) {
   const [selectedBg, setSelectedBg] = useState(BACKGROUNDS[0].id);
   const [selectedAccent, setSelectedAccent] = useState(ACCENT_COLORS[0].id);
@@ -102,8 +83,6 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
   const primaryName = mbtiResult?.name || "";
   const topTraits = Object.values(categoryResults).flatMap(r => r.traits).slice(0, 4);
 
-  const bgBase64Url = useBase64Image(bg.url);
-
   // Determine Avatar Data
   let avatarName = "";
   let avatarDesc = "";
@@ -118,7 +97,18 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
 
     avatarName = "Adventurer";
     avatarDesc = "Adventurer";
-    avatarContent = <AdventurerAvatar src={mbtiSprite} fallback={defaultSprite} />;
+    avatarContent = (
+      <img
+        src={mbtiSprite}
+        onError={(e) => {
+          e.currentTarget.src = defaultSprite;
+          e.currentTarget.onerror = null;
+        }}
+        alt="Adventurer"
+        className="h-28 w-28 object-contain"
+        style={{ imageRendering: "pixelated" }}
+      />
+    );
   } else {
     const activeGuideId = avatarMode === "best" ? bestGuideId : guideId;
     const activeGuide = GUIDES.find(g => g.id === activeGuideId);
@@ -133,14 +123,14 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
     if (!cardRef.current) return;
     setIsExporting(true);
     await new Promise(res => setTimeout(res, 100));
-    
+
     try {
-      const dataUrl = await toPng(cardRef.current, { 
-        pixelRatio: 3, 
+      const dataUrl = await toPng(cardRef.current, {
+        pixelRatio: 3,
         width: 360,
         height: 720,
-        style: { margin: "0", transform: "none" }, 
-        cacheBust: true 
+        style: { opacity: "1", margin: "0", transform: "none" },
+        cacheBust: true
       });
       setGeneratedImgUrl(dataUrl);
       const link = document.createElement("a");
@@ -151,7 +141,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
       console.error("Export failed", err);
       alert("Maaf, terjadi kesalahan saat memproses gambar.");
     }
-    
+
     setIsExporting(false);
   };
 
@@ -159,14 +149,14 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
     if (!cardRef.current) return;
     setIsExporting(true);
     await new Promise(res => setTimeout(res, 100));
-    
+
     try {
-      const dataUrl = await toPng(cardRef.current, { 
-        pixelRatio: 3, 
+      const dataUrl = await toPng(cardRef.current, {
+        pixelRatio: 3,
         width: 360,
         height: 720,
-        style: { margin: "0", transform: "none" }, 
-        cacheBust: true 
+        style: { opacity: "1", margin: "0", transform: "none" },
+        cacheBust: true
       });
       setGeneratedImgUrl(dataUrl);
       const res = await fetch(dataUrl);
@@ -189,7 +179,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
       console.error("Share failed", err);
       alert("Gagal membagikan. Anda bisa mengunduh gambar secara manual.");
     }
-    
+
     setIsExporting(false);
   };
 
@@ -197,8 +187,9 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
     <>
       {/* Background Image Layer - using img instead of CSS background for iOS Safari reliability */}
       <img
-        src={bgBase64Url!}
+        src={bg.url}
         alt=""
+        crossOrigin="anonymous"
         className="absolute inset-0 h-full w-full object-cover transition-all duration-500"
         style={{
           filter: isBgBlurred ? "blur(6px)" : "none",
@@ -224,7 +215,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
 
       {/* Content Wrapper */}
       <div className="relative z-10 flex h-full flex-col px-6 pt-6 pb-8 items-center">
-        
+
         {/* Header */}
         <div className="inline-flex items-center gap-2 text-[8px] font-bold tracking-[0.35em] text-white/60 uppercase mt-2">
           ✦ KnowYourself Soul Card ✦
@@ -309,7 +300,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
   return (
     <div className="w-full">
       {/* INVISIBLE ON-SCREEN CLONE FOR EXPORT (Guarantees zero flexbox offsets) */}
-      <div style={{ position: "fixed", top: 0, left: 0, opacity: 1, pointerEvents: "none", zIndex: -9999 }}>
+      <div style={{ position: "fixed", top: 0, left: 0, opacity: 0.01, pointerEvents: "none", zIndex: -100 }}>
         <div
           ref={cardRef}
           className="relative shrink-0 overflow-hidden rounded-3xl bg-gray-900"
@@ -503,24 +494,24 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
 
       {generatedImgUrl && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/90 p-4 backdrop-blur-sm animate-fade-in">
-          <button 
+          <button
             onClick={() => setGeneratedImgUrl(null)}
             className="absolute right-4 top-4 rounded-full bg-white/20 p-2 text-white hover:bg-white/30 transition-colors"
           >
             <X className="h-6 w-6" />
           </button>
-          
+
           <div className="text-center mb-6 max-w-sm">
             <h3 className="font-serif text-2xl font-bold text-white mb-2">Soul Card Siap!</h3>
             <p className="text-sm text-gray-300 bg-white/10 p-3 rounded-xl border border-white/20">
               Jika unduhan tidak otomatis berjalan, <strong className="text-emerald-400">Tekan tahan gambar di bawah ini</strong> lalu pilih "Simpan Gambar" / "Save Image".
             </p>
           </div>
-          
-          <img 
-            src={generatedImgUrl} 
-            alt="Your Soul Card" 
-            className="max-h-[60vh] w-auto max-w-full rounded-2xl shadow-2xl" 
+
+          <img
+            src={generatedImgUrl}
+            alt="Your Soul Card"
+            className="max-h-[60vh] w-auto max-w-full rounded-2xl shadow-2xl"
           />
         </div>
       )}
@@ -569,26 +560,5 @@ function MiniRadar({ cats, results, accent }: { cats: typeof CATEGORIES; results
         return <text key={i} x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" fontSize={6.5} fill="rgba(255,255,255,0.9)" fontWeight={700} fontFamily="Inter, sans-serif" letterSpacing="0.1em" style={{ textShadow: "0 2px 4px rgba(0,0,0,0.8)" }}>{(SHORT_NAMES[c.id] || c.name).toUpperCase()}</text>;
       })}
     </svg>
-  );
-}
-
-// ──────────────────────────────────────────────
-// ADVENTURER AVATAR COMPONENT (For Base64)
-// ──────────────────────────────────────────────
-function AdventurerAvatar({ src, fallback }: { src: string, fallback: string }) {
-  const [useFallback, setUseFallback] = useState(false);
-  const currentUrl = useFallback ? fallback : src;
-  const base64Url = useBase64Image(currentUrl);
-
-  return (
-    <img
-      src={base64Url!}
-      onError={() => {
-        if (!useFallback) setUseFallback(true);
-      }}
-      alt="Adventurer"
-      className="h-28 w-28 object-contain"
-      style={{ imageRendering: "pixelated" }}
-    />
   );
 }
