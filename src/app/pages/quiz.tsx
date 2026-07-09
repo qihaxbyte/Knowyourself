@@ -24,6 +24,7 @@ function ScaleSlider({
 }) {
   const [localVal, setLocalVal] = useState<number>(value);
   const onChangeRef = useRef(onChange);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Keep ref updated
   useEffect(() => {
@@ -35,13 +36,16 @@ function ScaleSlider({
     setLocalVal(value);
   }, [value]);
 
-  // Debounce parent update to prevent lag during active drag
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onChangeRef.current(localVal);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVal = parseFloat(e.target.value);
+    setLocalVal(newVal);
+    onInteract();
+    
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      onChangeRef.current(newVal);
     }, 150);
-    return () => clearTimeout(timer);
-  }, [localVal]);
+  };
 
   return (
     <div className="relative flex items-center h-10 w-full group">
@@ -51,10 +55,7 @@ function ScaleSlider({
         max={10}
         step={0.01}
         value={localVal}
-        onChange={(e) => {
-          onInteract();
-          setLocalVal(parseFloat(e.target.value));
-        }}
+        onChange={handleChange}
         onPointerDown={onInteract}
         onClick={onInteract}
         className="absolute inset-0 w-full h-full opacity-0 z-20 cursor-pointer"
