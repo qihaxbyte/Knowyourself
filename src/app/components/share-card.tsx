@@ -122,24 +122,14 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
   const handleDownload = async () => {
     if (!cardRef.current) return;
     setIsExporting(true);
-    setIsCapturing(true);
-    
-    // Wait for React to remove the scale and for the DOM to settle
-    await new Promise(res => setTimeout(res, 150));
+    await new Promise(res => setTimeout(res, 100));
     
     try {
       const dataUrl = await toPng(cardRef.current, { 
         pixelRatio: 3, 
         width: 360,
         height: 720,
-        style: { 
-          transform: "none", 
-          margin: "0", 
-          position: "absolute", 
-          left: "0", 
-          top: "0",
-          right: "auto" 
-        }, 
+        style: { opacity: "1", margin: "0", transform: "none" }, 
         cacheBust: true 
       });
       setGeneratedImgUrl(dataUrl);
@@ -152,31 +142,20 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
       alert("Maaf, terjadi kesalahan saat memproses gambar.");
     }
     
-    setIsCapturing(false);
     setIsExporting(false);
   };
 
   const handleShare = async () => {
     if (!cardRef.current) return;
     setIsExporting(true);
-    setIsCapturing(true);
-    
-    // Wait for React to remove the scale and for the DOM to settle
-    await new Promise(res => setTimeout(res, 150));
+    await new Promise(res => setTimeout(res, 100));
     
     try {
       const dataUrl = await toPng(cardRef.current, { 
         pixelRatio: 3, 
         width: 360,
         height: 720,
-        style: { 
-          transform: "none", 
-          margin: "0", 
-          position: "absolute", 
-          left: "0", 
-          top: "0",
-          right: "auto" 
-        }, 
+        style: { opacity: "1", margin: "0", transform: "none" }, 
         cacheBust: true 
       });
       setGeneratedImgUrl(dataUrl);
@@ -201,7 +180,6 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
       alert("Gagal membagikan. Anda bisa mengunduh gambar secara manual.");
     }
     
-    setIsCapturing(false);
     setIsExporting(false);
   };
 
@@ -321,7 +299,16 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
 
   return (
     <div className="w-full">
-
+      {/* INVISIBLE ON-SCREEN CLONE FOR EXPORT (Guarantees zero flexbox offsets) */}
+      <div style={{ position: "fixed", top: 0, left: 0, opacity: 0.01, pointerEvents: "none", zIndex: -100 }}>
+        <div
+          ref={cardRef}
+          className="relative shrink-0 overflow-hidden rounded-3xl bg-gray-900"
+          style={{ width: 360, height: 720, transform: "none" }}
+        >
+          {renderCardInner()}
+        </div>
+      </div>
 
       <div className="relative flex w-full flex-col gap-6 lg:flex-row">
 
@@ -331,13 +318,12 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
           {/* Card Wrapper for responsive scaling */}
           <div className="relative flex items-center justify-center w-full max-w-[360px]" style={{ aspectRatio: "360/720" }}>
             <div
-              ref={cardRef}
               className="absolute shrink-0 overflow-hidden rounded-3xl shadow-2xl origin-center bg-gray-900"
               style={{
                 width: 360,
                 height: 720,
-                // Remove scale during capture to prevent html-to-image from miscalculating the X/Y bounding rect
-                transform: isCapturing ? "none" : "scale(min(1, calc((100vw - 32px) / 360)))"
+                // Responsive scale for preview ONLY
+                transform: "scale(min(1, calc((100vw - 32px) / 360)))"
               }}
             >
               {renderCardInner()}
