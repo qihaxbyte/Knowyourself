@@ -276,19 +276,27 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
           {/* subtle accent glow inside the box */}
           <div className="absolute -right-8 -top-8 w-28 h-28 rounded-full blur-2xl opacity-40 pointer-events-none" style={{ background: accent.color }} />
           
-          <div className="flex items-center justify-between h-[115px]">
+          <div className="flex items-center justify-between h-auto py-1">
             {/* Stats Column */}
-            <div className="flex flex-col gap-3 w-1/2 pr-2">
-              {cats.slice(0, 4).map(c => {
+            <div className="flex flex-col gap-[7px] w-1/2 pr-2 relative z-10">
+              {cats.map(c => {
                 const result = categoryResults[c.id];
+                const score = result?.score || 0;
                 return (
-                  <div key={c.id} className="flex flex-col border-l-[3px] pl-2.5" style={{ borderColor: accent.color }}>
-                    <span className="text-[8px] font-bold uppercase tracking-[0.15em] text-white/70" style={{ fontFamily: "Inter, sans-serif" }}>
-                      {SHORT_NAMES[c.id] || c.name}
-                    </span>
-                    <span className="text-[12px] font-black text-white leading-none mt-1 drop-shadow-md" style={{ fontFamily: "Inter, sans-serif" }}>
+                  <div key={c.id} className="flex flex-col border-l-[3px] pl-2" style={{ borderColor: accent.color }}>
+                    <div className="flex justify-between items-center w-full">
+                       <span className="text-[7.5px] font-bold uppercase tracking-widest text-white/80" style={{ fontFamily: "Inter, sans-serif" }}>
+                         {SHORT_NAMES[c.id] || c.name}
+                       </span>
+                       <span className="text-[7px] font-bold text-white/90">{Math.round(score)}%</span>
+                    </div>
+                    <span className="text-[10px] font-black text-white leading-none mt-0.5 drop-shadow-md" style={{ fontFamily: "Inter, sans-serif" }}>
                       {result?.code || "—"}
                     </span>
+                    {/* Progress Bar */}
+                    <div className="w-full h-[2.5px] bg-white/10 mt-[3px] rounded-full overflow-hidden">
+                       <div className="h-full rounded-full transition-all" style={{ width: `${score}%`, background: accent.color }} />
+                    </div>
                   </div>
                 );
               })}
