@@ -134,7 +134,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
       const dataUrl = await toPng(cardRef.current, {
         pixelRatio: 3,
         width: 360,
-        height: 720,
+        height: 540,
         style: { opacity: "1", margin: "0", transform: "none" },
         cacheBust: true
       });
@@ -160,7 +160,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
       const dataUrl = await toPng(cardRef.current, {
         pixelRatio: 3,
         width: 360,
-        height: 720,
+        height: 540,
         style: { opacity: "1", margin: "0", transform: "none" },
         cacheBust: true
       });
@@ -307,7 +307,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
         <div
           ref={cardRef}
           className="relative shrink-0 overflow-hidden rounded-3xl bg-gray-900"
-          style={{ width: 360, height: 720, transform: "none" }}
+          style={{ width: 360, height: 540, transform: "none" }}
         >
           {renderCardInner()}
         </div>
@@ -319,12 +319,12 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
         <div className="flex flex-1 items-center justify-center overflow-hidden rounded-3xl bg-gray-900 p-4 lg:p-8" style={{ minHeight: "80vh" }}>
 
           {/* Card Wrapper for responsive scaling */}
-          <div className="relative flex items-center justify-center w-full max-w-[360px]" style={{ aspectRatio: "360/720" }}>
+          <div className="relative flex items-center justify-center w-full max-w-[360px]" style={{ aspectRatio: "360/540" }}>
             <div
               className="absolute shrink-0 overflow-hidden rounded-3xl shadow-2xl origin-center bg-gray-900"
               style={{
                 width: 360,
-                height: 720,
+                height: 540,
                 // Responsive scale for preview ONLY
                 transform: "scale(min(1, calc((100vw - 32px) / 360)))"
               }}
