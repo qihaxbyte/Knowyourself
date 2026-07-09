@@ -90,7 +90,7 @@ export default function Konsultasi() {
   };
 
   return (
-    <div className="flex h-[100dvh] w-full flex-col relative overflow-hidden" style={{
+    <div className="flex h-[100dvh] md:h-[calc(100dvh-76px)] -mb-16 md:mb-0 w-full flex-col relative overflow-hidden" style={{
       backgroundImage: `linear-gradient(to bottom, rgba(250,247,240, 0.75), rgba(250,247,240, 0.95)), url('${GUIDE_BG[guide.id] || "/assets/bg/bg_hasil_1783273726443.png"}')`,
       backgroundSize: "cover", backgroundPosition: "center",
       fontFamily: "Inter, sans-serif"
@@ -182,7 +182,7 @@ export default function Konsultasi() {
         </div>
       </div>
 
-      <footer className="border-t px-4 py-3 pb-8 z-10 backdrop-blur-md" style={{ borderColor: "rgba(232,224,213,0.5)", background: "rgba(255,255,255,0.65)" }}>
+      <footer className="border-t px-4 py-3 pb-[100px] md:pb-3 z-10 backdrop-blur-md" style={{ borderColor: "rgba(232,224,213,0.5)", background: "rgba(255,255,255,0.65)" }}>
         <div className="mx-auto flex max-w-2xl items-end gap-2 relative">
           <textarea
             value={input}

@@ -87,7 +87,7 @@ export default function App() {
         <Route path="/loading" element={<RequireSetup withLayout={false}><Loading /></RequireSetup>} />
         
         <Route path="/perjalanan" element={<RequireTest><Hasil /></RequireTest>} />
-        <Route path="/guide-chat" element={<RequireTest withLayout={false}><Konsultasi /></RequireTest>} />
+        <Route path="/guide-chat" element={<RequireTest><Konsultasi /></RequireTest>} />
         <Route path="/koneksi" element={<Layout><Koneksi /></Layout>} />
         <Route path="/profil" element={<Layout><Profil /></Layout>} />
         
