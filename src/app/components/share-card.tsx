@@ -125,6 +125,10 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
     await new Promise(res => setTimeout(res, 100));
     
     try {
+      // SAFARI (iOS) HACK: Run dummy captures to force Safari to load images into the SVG canvas memory
+      await toPng(cardRef.current, { pixelRatio: 1, width: 360, height: 720 });
+      await toPng(cardRef.current, { pixelRatio: 1, width: 360, height: 720 });
+      
       const dataUrl = await toPng(cardRef.current, { 
         pixelRatio: 3, 
         width: 360,
@@ -151,6 +155,10 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
     await new Promise(res => setTimeout(res, 100));
     
     try {
+      // SAFARI (iOS) HACK: Run dummy captures to force Safari to load images into the SVG canvas memory
+      await toPng(cardRef.current, { pixelRatio: 1, width: 360, height: 720 });
+      await toPng(cardRef.current, { pixelRatio: 1, width: 360, height: 720 });
+      
       const dataUrl = await toPng(cardRef.current, { 
         pixelRatio: 3, 
         width: 360,
