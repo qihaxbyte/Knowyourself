@@ -1,5 +1,6 @@
-// Vercel Serverless Function — AI Guide Chat
-// This replaces the Supabase Edge Function approach
+export const config = {
+  runtime: 'edge',
+};
 
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`;
 
@@ -80,35 +81,45 @@ ATURAN KETAT YANG HARUS DIIKUTI:
 10. Gunakan emoji secukupnya (1-2 per pesan) sesuai karaktermu.`;
 }
 
-export default async function handler(req, res) {
-  // CORS
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Headers", "authorization, x-client-info, apikey, content-type");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
 
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
+export default async function handler(request) {
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 200, headers: corsHeaders });
   }
 
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+  if (request.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+      status: 405,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
   try {
-    const { guideId, result, history } = req.body;
+    const body = await request.json();
+    const { guideId, result, history } = body;
 
     if (!guideId || !history || !Array.isArray(history)) {
-      return res.status(400).json({ error: "Missing required fields: guideId, history" });
+      return new Response(JSON.stringify({ error: "Missing required fields: guideId, history" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
     if (!GEMINI_API_KEY) {
-      return res.status(500).json({ error: "AI service not configured" });
+      return new Response(JSON.stringify({ error: "AI service not configured" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const systemPrompt = buildSystemPrompt(guideId, result || "Tidak ada hasil tes.");
 
-    // Build Gemini request
     const contents = history.map((m) => ({
       role: m.role === "user" ? "user" : "model",
       parts: [{ text: m.text }],
@@ -138,7 +149,10 @@ export default async function handler(req, res) {
     if (!geminiRes.ok) {
       const errBody = await geminiRes.text();
       console.error("Gemini API error:", geminiRes.status, errBody);
-      return res.status(502).json({ error: `AI service error: ${geminiRes.status}` });
+      return new Response(JSON.stringify({ error: `AI service error: ${geminiRes.status}` }), {
+        status: 502,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const data = await geminiRes.json();
@@ -146,9 +160,15 @@ export default async function handler(req, res) {
       data?.candidates?.[0]?.content?.parts?.[0]?.text ||
       "Maaf, aku sedang tidak bisa menjawab saat ini. Coba lagi sebentar.";
 
-    return res.status(200).json({ reply });
+    return new Response(JSON.stringify({ reply }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (err) {
     console.error("Chat API error:", err);
-    return res.status(500).json({ error: "Internal server error" });
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 }
