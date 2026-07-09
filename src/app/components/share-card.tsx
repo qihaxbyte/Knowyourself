@@ -123,7 +123,13 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
     setIsExporting(true);
     await new Promise(res => setTimeout(res, 100));
     try {
-      const dataUrl = await toPng(cardRef.current, { pixelRatio: 3, style: { transform: "none" }, cacheBust: true });
+      const dataUrl = await toPng(cardRef.current, { 
+        pixelRatio: 3, 
+        width: 360,
+        height: 700,
+        style: { transform: "none", margin: "0" }, 
+        cacheBust: true 
+      });
       setGeneratedImgUrl(dataUrl);
       const link = document.createElement("a");
       link.download = `SoulCard_${primaryCode}.png`;
@@ -141,7 +147,13 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
     setIsExporting(true);
     await new Promise(res => setTimeout(res, 100));
     try {
-      const dataUrl = await toPng(cardRef.current, { pixelRatio: 3, style: { transform: "none" }, cacheBust: true });
+      const dataUrl = await toPng(cardRef.current, { 
+        pixelRatio: 3, 
+        width: 360,
+        height: 700,
+        style: { transform: "none", margin: "0" }, 
+        cacheBust: true 
+      });
       setGeneratedImgUrl(dataUrl);
       const res = await fetch(dataUrl);
       const blob = await res.blob();
@@ -282,16 +294,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
 
   return (
     <div className="w-full">
-      {/* OFF-SCREEN EXPORT TARGET (Perfect 1:1 unscaled for html-to-image) */}
-      <div style={{ position: "absolute", top: 0, left: "-9999px", pointerEvents: "none" }}>
-        <div
-          ref={cardRef}
-          className="relative shrink-0 overflow-hidden rounded-3xl bg-gray-900"
-          style={{ width: 360, height: 640 }}
-        >
-          {renderCardInner()}
-        </div>
-      </div>
+
 
       <div className="relative flex w-full flex-col gap-6 lg:flex-row">
 
@@ -299,12 +302,13 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
         <div className="flex flex-1 items-center justify-center overflow-hidden rounded-3xl bg-gray-900 p-4 lg:p-8" style={{ minHeight: "80vh" }}>
 
           {/* Card Wrapper for responsive scaling */}
-          <div className="relative flex items-center justify-center w-full max-w-[360px]" style={{ aspectRatio: "360/640" }}>
+          <div className="relative flex items-center justify-center w-full max-w-[360px]" style={{ aspectRatio: "360/700" }}>
             <div
+              ref={cardRef}
               className="absolute shrink-0 overflow-hidden rounded-3xl shadow-2xl origin-center bg-gray-900"
               style={{
                 width: 360,
-                height: 640,
+                height: 700,
                 // Responsive scale for preview ONLY
                 transform: "scale(min(1, calc((100vw - 32px) / 360)))"
               }}
