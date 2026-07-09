@@ -3,7 +3,7 @@ import { X, Download, Share2, Image, Palette, User, Sparkles, Check, ChevronLeft
 import { GUIDES, CATEGORIES, type Gender, GUIDE_BG } from "../flow";
 import { GuideSprite } from "./guide-sprite";
 import type { AllResults } from "../scoring";
-import html2canvas from "html2canvas";
+import { toPng, toBlob } from "html-to-image";
 
 const SHORT_NAMES: Record<string, string> = {
   kepribadian: "Kepribadian",
@@ -125,26 +125,17 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
     await new Promise(res => setTimeout(res, 100));
 
     try {
-      const canvas = await html2canvas(cardRef.current, {
-        scale: 3,
-        backgroundColor: null,
-        useCORS: true,
-        logging: false,
-        onclone: (clonedDoc) => {
-          // Fix for html2canvas clipping with transform scale
-          const el = clonedDoc.getElementById("soulcard-export-target");
-          if (el) {
-            el.style.transform = "none";
-          }
-        }
+      const dataUrl = await toPng(cardRef.current, {
+        pixelRatio: 3,
+        style: { transform: "none" }
       });
-      const dataUrl = canvas.toDataURL("image/png");
       const link = document.createElement("a");
       link.download = `SoulCard_${primaryCode}.png`;
       link.href = dataUrl;
       link.click();
     } catch (err) {
       console.error("Export failed", err);
+      alert("Maaf, terjadi kesalahan saat mengunduh gambar.");
     }
     setIsExporting(false);
   };
@@ -155,30 +146,32 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
     await new Promise(res => setTimeout(res, 100));
 
     try {
-      const canvas = await html2canvas(cardRef.current, {
-        scale: 3,
-        backgroundColor: null,
-        useCORS: true,
-        onclone: (clonedDoc) => {
-          const el = clonedDoc.getElementById("soulcard-export-target");
-          if (el) el.style.transform = "none";
-        }
+      const blob = await toBlob(cardRef.current, {
+        pixelRatio: 3,
+        style: { transform: "none" }
       });
-      const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), "image/png"));
+      
+      if (!blob) throw new Error("Failed to generate blob");
+      
       const file = new File([blob], `SoulCard_${primaryCode}.png`, { type: "image/png" });
 
-      if (navigator.share && navigator.canShare({ files: [file] })) {
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
           title: `Soul Card — ${primaryCode}`,
           text: `Aku adalah ${primaryCode} "${primaryName}" di KnowYourself! 🌟 Coba juga yuk!`,
           files: [file],
         });
       } else {
-        handleDownload();
+        // Fallback ke download jika share tidak didukung
+        const dataUrl = await toPng(cardRef.current, { pixelRatio: 3, style: { transform: "none" } });
+        const link = document.createElement("a");
+        link.download = `SoulCard_${primaryCode}.png`;
+        link.href = dataUrl;
+        link.click();
       }
     } catch (err) {
       console.error("Share failed", err);
-      handleDownload();
+      alert("Browser Anda tidak mendukung fitur berbagi ini, atau terjadi kesalahan.");
     }
     setIsExporting(false);
   };
