@@ -3,7 +3,7 @@ import { X, Download, Share2, Image, Palette, User, Sparkles, Check, ChevronLeft
 import { GUIDES, CATEGORIES, type Gender, GUIDE_BG } from "../flow";
 import { GuideSprite } from "./guide-sprite";
 import type { AllResults } from "../scoring";
-import { toPng, toBlob } from "html-to-image";
+import html2canvas from "html2canvas";
 
 const SHORT_NAMES: Record<string, string> = {
   kepribadian: "Kepribadian",
@@ -135,17 +135,14 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
     await new Promise(res => setTimeout(res, 100));
     
     try {
-      // SAFARI (iOS) HACK: Run dummy captures to force Safari to load images into the SVG canvas memory
-      await toPng(cardRef.current, { pixelRatio: 1, width: 360, height: 720 });
-      await toPng(cardRef.current, { pixelRatio: 1, width: 360, height: 720 });
-      
-      const dataUrl = await toPng(cardRef.current, { 
-        pixelRatio: 3, 
-        width: 360,
-        height: 720,
-        style: { opacity: "1", margin: "0", transform: "none" }, 
-        cacheBust: true 
+      const canvas = await html2canvas(cardRef.current, {
+        scale: 3,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null,
       });
+      const dataUrl = canvas.toDataURL("image/png");
+      
       setGeneratedImgUrl(dataUrl);
       const link = document.createElement("a");
       link.download = `SoulCard_${primaryCode}.png`;
@@ -165,17 +162,14 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
     await new Promise(res => setTimeout(res, 100));
     
     try {
-      // SAFARI (iOS) HACK: Run dummy captures to force Safari to load images into the SVG canvas memory
-      await toPng(cardRef.current, { pixelRatio: 1, width: 360, height: 720 });
-      await toPng(cardRef.current, { pixelRatio: 1, width: 360, height: 720 });
-      
-      const dataUrl = await toPng(cardRef.current, { 
-        pixelRatio: 3, 
-        width: 360,
-        height: 720,
-        style: { opacity: "1", margin: "0", transform: "none" }, 
-        cacheBust: true 
+      const canvas = await html2canvas(cardRef.current, {
+        scale: 3,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null,
       });
+      const dataUrl = canvas.toDataURL("image/png");
+
       setGeneratedImgUrl(dataUrl);
       const res = await fetch(dataUrl);
       const blob = await res.blob();
@@ -318,7 +312,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
   return (
     <div className="w-full">
       {/* INVISIBLE ON-SCREEN CLONE FOR EXPORT (Guarantees zero flexbox offsets) */}
-      <div style={{ position: "fixed", top: 0, left: 0, opacity: 0.01, pointerEvents: "none", zIndex: -100 }}>
+      <div style={{ position: "fixed", top: 0, left: 0, opacity: 1, pointerEvents: "none", zIndex: -9999 }}>
         <div
           ref={cardRef}
           className="relative shrink-0 overflow-hidden rounded-3xl bg-gray-900"
