@@ -1,27 +1,22 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import { Users, Heart, Crown, ArrowLeft } from "lucide-react";
-import ShareCard from "./share-card";
-import SoulResonance from "./soul-resonance";
+import ShareCard from "../components/share-card";
+import SoulResonance from "../components/soul-resonance";
 import type { AllResults } from "../scoring";
 import type { GuideMatch, Gender } from "../flow";
+import { useAppStore } from "../store/useAppStore";
 
-export default function Koneksi({ 
-  categoryResults, 
-  guideId,
-  guideMatches,
-  selectedCats, 
-  gender,
-  onBack,
-  onTakeTest
-}: { 
-  categoryResults: AllResults; 
-  guideId: string | null;
-  guideMatches: GuideMatch[];
-  selectedCats: string[]; 
-  gender: Gender | null;
-  onBack: () => void;
-  onTakeTest: () => void;
-}) {
+export default function Koneksi() {
+  const navigate = useNavigate();
+  const categoryResults = useAppStore(state => state.categoryResults);
+  const guideId = useAppStore(state => state.guide);
+  const guideMatches = useAppStore(state => state.guideMatches);
+  const selectedCats = useAppStore(state => state.cats);
+  const gender = useAppStore(state => state.gender);
+  
+  const onBack = () => navigate(-1);
+  const onTakeTest = () => navigate("/pilih");
   const [tab, setTab] = useState<"forge" | "resonance">(() => {
     if (typeof window !== "undefined" && new URLSearchParams(window.location.search).has("compare")) return "resonance";
     return "forge";

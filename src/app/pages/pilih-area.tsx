@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import { ArrowLeft, ArrowRight, Check, Clock, ListChecks, X } from "lucide-react";
 import { CATEGORIES } from "../flow";
 import { CATEGORY_TIME_ESTIMATES } from "../questions";
+import { useAppStore } from "../store/useAppStore";
 
 const ICON_IMGS: Record<string, string> = {
   kepribadian: "/assets/icons/cat_kepribadian_pixel.png",
@@ -12,9 +14,15 @@ const ICON_IMGS: Record<string, string> = {
   kesejahteraan: "/assets/icons/cat_kesejahteraan_pixel.png",
 };
 
-export default function PilihArea({ onBack, onNext, initial, initialQuick = null }: { onBack: () => void; onNext: (ids: string[], isQuick: boolean) => void; initial: string[]; initialQuick?: boolean | null }) {
-  const [selected, setSelected] = useState<Set<string>>(new Set(initial));
-  const [isQuick, setIsQuick] = useState<boolean | null>(initialQuick);
+export default function PilihArea() {
+  const navigate = useNavigate();
+  const cats = useAppStore(state => state.cats);
+  const isQuickMode = useAppStore(state => state.isQuick);
+  const setCats = useAppStore(state => state.setCats);
+  const setIsQuickState = useAppStore(state => state.setIsQuick);
+  
+  const [selected, setSelected] = useState<Set<string>>(new Set(cats));
+  const [isQuick, setIsQuick] = useState<boolean | null>(isQuickMode);
   const toggle = (id: string) => {
     const s = new Set(selected);
     s.has(id) ? s.delete(id) : s.add(id);
@@ -31,7 +39,7 @@ export default function PilihArea({ onBack, onNext, initial, initialQuick = null
       fontFamily: "Inter, sans-serif"
     }}>
       <div className="relative z-10 mx-auto max-w-3xl px-6 pt-safe pb-8">
-        <button onClick={onBack} className="flex items-center gap-2 text-sm" style={{ color: "#555" }}>
+        <button onClick={() => navigate("/landing")} className="flex items-center gap-2 text-sm" style={{ color: "#555" }}>
           <ArrowLeft className="h-4 w-4" /> Kembali
         </button>
 
@@ -157,7 +165,11 @@ export default function PilihArea({ onBack, onNext, initial, initialQuick = null
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white/95 backdrop-blur" style={{ borderColor: "#E8E0D5" }}>
         <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4 pb-safe">
           <div className="text-sm" style={{ color: "#555" }}><span className="font-semibold" style={{ color: "#1A1A1A" }}>{count}</span> kategori dipilih</div>
-          <button disabled={count === 0 || isQuick === null} onClick={() => onNext(Array.from(selected), isQuick!)} className="inline-flex items-center gap-2 rounded-xl px-6 text-white transition disabled:cursor-not-allowed disabled:opacity-40 hover:brightness-110" style={{ background: "#2D6A4F", height: 48, fontWeight: 600 }}>
+          <button disabled={count === 0 || isQuick === null} onClick={() => {
+            setCats(Array.from(selected));
+            setIsQuickState(isQuick);
+            navigate("/gender");
+          }} className="inline-flex items-center gap-2 rounded-xl px-6 text-white transition disabled:cursor-not-allowed disabled:opacity-40 hover:brightness-110" style={{ background: "#2D6A4F", height: 48, fontWeight: 600 }}>
             Lanjut <ArrowRight className="h-4 w-4" />
           </button>
         </div>

@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import { GUIDES, GUIDE_BG } from "../flow";
-import { GuideSprite } from "./guide-sprite";
+import { GuideSprite } from "../components/guide-sprite";
+import { useAppStore } from "../store/useAppStore";
 
-export default function Welcome({ guideId, onNext, onChangeGuide }: { guideId: string; onNext: () => void; onChangeGuide: () => void }) {
+export default function Welcome() {
+  const navigate = useNavigate();
+  const guideId = useAppStore(state => state.guide) || "vampire";
   const guide = GUIDES.find(g => g.id === guideId)!;
   const fullText = `Hei! Aku ${guide.name}, ${guide.title}. ✨\nAku akan membantumu menggali potensi tersembunyimu sepanjang perjalanan ini.\nSiap memulai petualanganmu?`;
   const [shown, setShown] = useState("");
@@ -28,7 +32,7 @@ export default function Welcome({ guideId, onNext, onChangeGuide }: { guideId: s
       {/* ── Header ── */}
       <div className="relative z-10 mx-auto max-w-2xl px-6 pt-safe pb-4 text-gray-700">
         <button
-          onClick={onChangeGuide}
+          onClick={() => navigate("/guide")}
           className="flex items-center gap-2 rounded-full bg-white/40 px-3 py-1.5 text-sm backdrop-blur transition hover:bg-white/60 shadow-sm"
         >
           <ArrowLeft className="h-4 w-4" /> Kembali
@@ -62,7 +66,7 @@ export default function Welcome({ guideId, onNext, onChangeGuide }: { guideId: s
           </div>
 
           <div className="mt-6 flex flex-col items-center gap-3">
-            <button onClick={onNext} className="inline-flex w-full max-w-sm items-center justify-center gap-2 rounded-xl px-6 text-white transition hover:brightness-110 shadow-premium" style={{ background: guide.color, height: 52, fontWeight: 600 }}>
+            <button onClick={() => navigate("/quiz")} className="inline-flex w-full max-w-sm items-center justify-center gap-2 rounded-xl px-6 text-white transition hover:brightness-110 shadow-premium" style={{ background: guide.color, height: 52, fontWeight: 600 }}>
               Siap! Mulai <ArrowRight className="h-4 w-4" />
             </button>
           </div>

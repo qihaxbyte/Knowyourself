@@ -1,19 +1,26 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router";
 import { ArrowLeft, ArrowRight, Heart, GripVertical } from "lucide-react";
-import { GUIDES, CATEGORIES, GUIDE_BG, type QuizQ, type AnswerEntry } from "../flow";
+import { GUIDES, CATEGORIES, GUIDE_BG, type QuizQ, type AnswerEntry, computeGuideMatch } from "../flow";
 import { getQuestionsForCategories } from "../questions";
 import { getGuideDialogue } from "../dialogues";
-import { GuideSprite } from "./guide-sprite";
+import { computeAllResults } from "../scoring";
+import { GuideSprite } from "../components/guide-sprite";
+import { useAppStore } from "../store/useAppStore";
 
 // High-performance slider component to prevent parent re-renders during drag
 function ScaleSlider({
   value,
   onChange,
-  categoryColor
+  categoryColor,
+  touched,
+  onInteract
 }: {
   value: number;
   onChange: (val: number) => void;
   categoryColor: string;
+  touched: boolean;
+  onInteract: () => void;
 }) {
   const [localVal, setLocalVal] = useState<number>(value);
   const onChangeRef = useRef(onChange);
@@ -44,16 +51,21 @@ function ScaleSlider({
         max={10}
         step={0.01}
         value={localVal}
-        onChange={(e) => setLocalVal(parseFloat(e.target.value))}
+        onChange={(e) => {
+          onInteract();
+          setLocalVal(parseFloat(e.target.value));
+        }}
+        onPointerDown={onInteract}
+        onClick={onInteract}
         className="absolute inset-0 w-full h-full opacity-0 z-20 cursor-pointer"
       />
 
       <div className="w-full h-1.5 rounded-full bg-gray-200 shadow-inner overflow-hidden relative z-0 border border-black/5">
         <div
-          className="h-full"
+          className="h-full transition-colors duration-200"
           style={{
             width: `${(((localVal) - 1) / 9) * 100}%`,
-            background: categoryColor
+            background: touched ? categoryColor : "#CCC"
           }}
         />
       </div>
@@ -67,10 +79,14 @@ function ScaleSlider({
         }}
       >
         <span
-          className="pixel-font text-2xl leading-none"
+          className="pixel-font text-2xl leading-none transition-all duration-200"
           style={{
-            color: categoryColor,
-            textShadow: "-1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF, 0px 2px 4px rgba(0,0,0,0.5)"
+            color: touched ? categoryColor : "#AAA",
+            textShadow: touched 
+              ? "-1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF, 0px 2px 4px rgba(0,0,0,0.5)" 
+              : "-1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF, 0px 1px 2px rgba(0,0,0,0.2)",
+            filter: touched ? "none" : "grayscale(100%)",
+            opacity: touched ? 1 : 0.6
           }}
         >
           ✦
@@ -82,19 +98,16 @@ function ScaleSlider({
 
 const FREQ_LABELS = ["Tidak pernah", "Jarang", "Kadang-kadang", "Cukup sering", "Sangat sering"];
 
-export default function Quiz({
-  guideId,
-  selectedCats,
-  isQuick,
-  onBack,
-  onDone,
-}: {
-  guideId: string;
-  selectedCats: string[];
-  isQuick: boolean;
-  onBack: () => void;
-  onDone: (answers: AnswerEntry[]) => void;
-}) {
+export default function Quiz() {
+  const navigate = useNavigate();
+  const guideId = useAppStore(state => state.guide) || "vampire";
+  const selectedCats = useAppStore(state => state.cats);
+  const isQuick = useAppStore(state => state.isQuick) || false;
+  
+  const setAnswers = useAppStore(state => state.setAnswers);
+  const setGuideMatches = useAppStore(state => state.setGuideMatches);
+  const setCategoryResults = useAppStore(state => state.setCategoryResults);
+
   const guide = GUIDES.find((g) => g.id === guideId)!;
   const questions = useRef(getQuestionsForCategories(selectedCats, isQuick)).current;
   const total = questions.length;
@@ -139,7 +152,7 @@ export default function Quiz({
       setEssay("");
       if (nextQ.type === "scale") {
         setScaleVals(nextQ.statements.map(() => 5));
-        setScaleTouched(nextQ.statements.map(() => true));
+        setScaleTouched(nextQ.statements.map(() => false));
       } else {
         setScaleVals([]);
         setScaleTouched([]);
@@ -184,7 +197,11 @@ export default function Quiz({
   const goNext = () => {
     saveCurrentAnswer();
     if (idx + 1 >= total) {
-      onDone(savedAnswers.current.filter(Boolean) as AnswerEntry[]);
+      const finalAnswers = savedAnswers.current.filter(Boolean) as AnswerEntry[];
+      setAnswers(finalAnswers);
+      setGuideMatches(computeGuideMatch(finalAnswers));
+      setCategoryResults(computeAllResults(finalAnswers, selectedCats));
+      navigate("/loading");
       return;
     }
     loadQuestion(idx + 1);
@@ -194,7 +211,7 @@ export default function Quiz({
 
   const goPrev = () => {
     if (idx === 0) {
-      onBack();
+      navigate("/welcome");
       return;
     }
     saveCurrentAnswer();
@@ -353,13 +370,23 @@ export default function Quiz({
                     <ScaleSlider
                       value={scaleVals[i] ?? 5}
                       categoryColor={categoryColor}
+                      touched={scaleTouched[i]}
+                      onInteract={() => {
+                        if (!scaleTouched[i]) {
+                          const t = [...scaleTouched];
+                          t[i] = true;
+                          setScaleTouched(t);
+                        }
+                      }}
                       onChange={(val) => {
                         const next = [...scaleVals];
                         next[i] = val;
                         setScaleVals(next);
-                        const t = [...scaleTouched];
-                        t[i] = true;
-                        setScaleTouched(t);
+                        if (!scaleTouched[i]) {
+                          const t = [...scaleTouched];
+                          t[i] = true;
+                          setScaleTouched(t);
+                        }
                       }}
                     />
                     <div className="flex items-start justify-between mt-1 px-1">

@@ -1,8 +1,15 @@
+import { useNavigate } from "react-router";
 import { User, Shield, Info, LogOut, ChevronLeft } from "lucide-react";
 import type { Gender } from "../flow";
 import { getAvatarForMBTI } from "../scoring";
+import { useAppStore } from "../store/useAppStore";
 
-export default function Profil({ onBack, gender, mbtiCode }: { onBack: () => void; gender: Gender | null; mbtiCode: string | null }) {
+export default function Profil() {
+  const navigate = useNavigate();
+  const gender = useAppStore(state => state.gender);
+  const categoryResults = useAppStore(state => state.categoryResults);
+  const mbtiCode = categoryResults?.kepribadian?.code || null;
+  const onBack = () => navigate(-1);
   const genderSprite = mbtiCode && gender ? getAvatarForMBTI(mbtiCode, gender)
     : gender === "male" ? "/assets/sprites/adventurer_male.png"
       : gender === "female" ? "/assets/sprites/adventurer_female.png"

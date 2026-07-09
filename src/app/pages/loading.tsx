@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import { GUIDES } from "../flow";
-import { GuideSprite } from "./guide-sprite";
+import { GuideSprite } from "../components/guide-sprite";
+import { useAppStore } from "../store/useAppStore";
 
 const PHASES = ["Menganalisis jawabanmu...", "Menemukan pola tersembunyimu...", "Merangkai insight terbaik...", "Hampir selesai..."];
 const CHECKS = ["Memahami kepribadianmu", "Mencari pola terbaikmu", "Merangkai insight terbaik", "Hampir selesai..."];
 
-export default function Loading({ guideId, onDone }: { guideId: string; onDone: () => void }) {
+export default function Loading() {
+  const navigate = useNavigate();
+  const guideId = useAppStore(state => state.guide) || "vampire";
   const guide = GUIDES.find(g => g.id === guideId)!;
   const [progress, setProgress] = useState(0);
   const [phase, setPhase] = useState(0);
@@ -13,11 +17,11 @@ export default function Loading({ guideId, onDone }: { guideId: string; onDone: 
   useEffect(() => {
     const t = setInterval(() => setProgress(p => {
       const next = p + 2;
-      if (next >= 100) { clearInterval(t); setTimeout(onDone, 500); return 100; }
+      if (next >= 100) { clearInterval(t); setTimeout(() => navigate("/perjalanan"), 500); return 100; }
       return next;
     }), 80);
     return () => clearInterval(t);
-  }, [onDone]);
+  }, [navigate]);
 
   useEffect(() => {
     const t = setInterval(() => setPhase(p => (p + 1) % PHASES.length), 1500);

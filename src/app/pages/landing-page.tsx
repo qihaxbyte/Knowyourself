@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { useNavigate } from "react-router";
+import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { ArrowRight, Compass, ScrollText, Gem, Bell, Sparkles, ChevronDown, Star, Brain, Briefcase, Coins, GraduationCap, HeartHandshake, Leaf } from "lucide-react";
 import { GUIDES, CATEGORIES } from "../flow";
-import { GuideSprite as Sprite } from "./guide-sprite";
+import { GuideSprite as Sprite } from "../components/guide-sprite";
 
 const ICON_IMGS: Record<string, string> = {
   kepribadian: "/assets/icons/cat_kepribadian_pixel.png",
@@ -65,10 +66,18 @@ function Firefly({ left, top, delay }: { left: string; top: string; delay: strin
   );
 }
 
-export default function LandingPage({ onStart, onNav }: { onStart?: () => void; onNav?: (target: string) => void }) {
+export default function LandingPage() {
+  const navigate = useNavigate();
   const [showAbout, setShowAbout] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [showContact, setShowContact] = useState(false);
+  
+  const handleStart = () => navigate("/pilih");
+  
+  const handleNav = (target: string) => {
+    const map: Record<string, string> = { "Koneksi": "koneksi", "Perjalanan": "perjalanan", "Guide": "guide-chat", "Profil": "profil" };
+    if (map[target]) navigate("/" + map[target]);
+  };
 
   return (
     <div className="min-h-screen w-full" style={{ background: "#FAF7F0", color: "#1A1A1A", fontFamily: "Inter, sans-serif" }}>
@@ -104,7 +113,7 @@ export default function LandingPage({ onStart, onNav }: { onStart?: () => void; 
 
         {/* Top bar */}
         <header className="relative z-20 mx-auto flex max-w-7xl items-center justify-between px-8 pt-safe pb-5">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={onStart}>
+          <div className="flex items-center gap-2 cursor-pointer" onClick={handleStart}>
             <span className="text-amber-500 pixel-font text-lg">✦</span>
             <span className="font-bold text-white pixel-font text-sm">KnowYourself</span>
           </div>
@@ -126,7 +135,7 @@ export default function LandingPage({ onStart, onNav }: { onStart?: () => void; 
 
             <div className="mt-8 flex flex-wrap items-center gap-4 relative z-50">
               <button
-                onClick={onStart}
+                onClick={handleStart}
                 className="group inline-flex items-center gap-2 rounded-xl px-6 text-white shadow-premium transition-all duration-300 hover:scale-105 hover:brightness-110 animate-pulse-glow"
                 style={{ background: "#2D6A4F", height: 52, fontWeight: 600 }}
               >
@@ -311,10 +320,10 @@ export default function LandingPage({ onStart, onNav }: { onStart?: () => void; 
             <div>
               <h4 className="font-bold text-gray-900">Navigasi</h4>
               <ul className="mt-4 space-y-2 text-sm text-gray-600">
-                <li><button onClick={() => onNav?.("Beranda")} className="hover:text-gray-900 hover:underline">Beranda</button></li>
-                <li><button onClick={() => onNav?.("Perjalanan")} className="hover:text-gray-900 hover:underline">Mulai Perjalanan</button></li>
-                <li><button onClick={() => onNav?.("Profil")} className="hover:text-gray-900 hover:underline">Profil</button></li>
-                <li><button onClick={() => onNav?.("Koneksi")} className="hover:text-gray-900 hover:underline">Koneksi Sosial</button></li>
+                <li><button onClick={() => handleNav("Beranda")} className="hover:text-gray-900 hover:underline">Beranda</button></li>
+                <li><button onClick={() => handleNav("Perjalanan")} className="hover:text-gray-900 hover:underline">Mulai Perjalanan</button></li>
+                <li><button onClick={() => handleNav("Profil")} className="hover:text-gray-900 hover:underline">Profil</button></li>
+                <li><button onClick={() => handleNav("Koneksi")} className="hover:text-gray-900 hover:underline">Koneksi Sosial</button></li>
               </ul>
             </div>
             <div>

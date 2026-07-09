@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router";
 import { ArrowLeft, Send, Sparkles, AlertCircle } from "lucide-react";
 import { GUIDES, GUIDE_BG } from "../flow";
-import { GuideSprite } from "./guide-sprite";
+import { GuideSprite } from "../components/guide-sprite";
 import type { AllResults } from "../scoring";
+import { useAppStore } from "../store/useAppStore";
 
 type Msg = { role: "user" | "guide"; text: string; ts: number };
 
@@ -47,7 +49,11 @@ async function callAI(guideId: string, result: string, history: Msg[]): Promise<
   return data.reply as string;
 }
 
-export default function Konsultasi({ guideId, categoryResults, onBack }: { guideId: string; categoryResults: AllResults; onBack: () => void }) {
+export default function Konsultasi() {
+  const navigate = useNavigate();
+  const guideId = useAppStore(state => state.guide) || "vampire";
+  const categoryResults = useAppStore(state => state.categoryResults);
+  const onBack = () => navigate(-1);
   const guide = GUIDES.find(g => g.id === guideId)!;
   const resultSummary = buildResultSummary(categoryResults);
   const primaryCode = categoryResults?.kepribadian?.code || "—";

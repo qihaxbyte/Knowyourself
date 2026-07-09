@@ -1,15 +1,32 @@
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router";
 import { Sparkles, Star, Share2, RotateCcw, MessageCircle, Crown, Zap, Heart, Home, Download, TrendingUp, Target, Sprout, ChevronDown, ChevronUp } from "lucide-react";
 import { CATEGORIES, GUIDES, GuideMatch, QuizAnswers, GUIDE_BG } from "../flow";
-import { GuideSprite } from "./guide-sprite";
+import { GuideSprite } from "../components/guide-sprite";
 import { type AllResults, type CategoryResult, computeMBTI } from "../scoring";
 import { getCategoryInsight, getGuideComment, type CategoryInsight } from "../insights";
-import ShareCard from "./share-card";
-import SoulResonance from "./soul-resonance";
+import ShareCard from "../components/share-card";
+import SoulResonance from "../components/soul-resonance";
 import { toPng } from "html-to-image";
 import type { Gender } from "../flow";
+import { useAppStore } from "../store/useAppStore";
 
-export default function Hasil({ guideId, selectedCats, guideMatches, answers, categoryResults, gender, onRestart, onChat, onShare }: { guideId: string; selectedCats: string[]; guideMatches: GuideMatch[]; answers: QuizAnswers; categoryResults: AllResults; gender: Gender | null; onRestart: () => void; onChat: (id?: string) => void; onShare: () => void }) {
+export default function Hasil() {
+  const navigate = useNavigate();
+  const guideId = useAppStore(state => state.guide) || "vampire";
+  const selectedCats = useAppStore(state => state.cats);
+  const guideMatches = useAppStore(state => state.guideMatches);
+  const answers = useAppStore(state => state.answers);
+  const categoryResults = useAppStore(state => state.categoryResults);
+  const gender = useAppStore(state => state.gender);
+  const setGuide = useAppStore(state => state.setGuide);
+  
+  const onRestart = () => navigate("/landing");
+  const onShare = () => navigate("/koneksi");
+  const onChat = (id?: string) => {
+    if (id) setGuide(id);
+    navigate("/guide-chat");
+  };
   const guide = GUIDES.find(g => g.id === guideId)!;
   const cats = CATEGORIES.filter(c => selectedCats.includes(c.id));
   const [tab, setTab] = useState<"ringkasan" | "kategori" | "guide-match" | "saran">("ringkasan");

@@ -1,6 +1,13 @@
 import { Home, Compass, MessageCircle, User, BookOpen } from "lucide-react";
+import { useLocation, useNavigate } from "react-router";
 
-export default function Navbar({ current, onNav }: { current: string; onNav: (target: string) => void }) {
+export default function Navbar() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Extract the current path without the leading slash
+  const current = location.pathname.substring(1);
+
   const NAV_ITEMS = [
     { id: "landing", label: "Beranda", iconImg: "/assets/icons/nav_beranda.png" },
     { id: "perjalanan", label: "Perjalanan", iconImg: "/assets/icons/nav_perjalanan.png" },
@@ -13,17 +20,17 @@ export default function Navbar({ current, onNav }: { current: string; onNav: (ta
     <>
       {/* Desktop Top Navbar */}
       <header className="glass-panel sticky top-0 z-50 hidden md:flex items-center justify-between px-6 py-4" style={{ borderColor: "rgba(232, 224, 213, 0.5)" }}>
-        <div className="flex items-center gap-2 transition hover:opacity-80" style={{ cursor: "pointer" }} onClick={() => onNav("landing")}>
+        <div className="flex items-center gap-2 transition hover:opacity-80" style={{ cursor: "pointer" }} onClick={() => navigate("/landing")}>
           <span className="text-emerald-500 pixel-font text-lg">✦</span>
           <span className="font-bold pixel-font text-sm" style={{ color: "#222" }}>KnowYourself</span>
         </div>
         <nav className="flex items-center gap-6">
           {NAV_ITEMS.map((n) => {
-            const isActive = current === n.id;
+            const isActive = current.startsWith(n.id);
             return (
               <button
                 key={n.id}
-                onClick={() => onNav(n.id)}
+                onClick={() => navigate(`/${n.id}`)}
                 className="group flex items-center gap-2 text-sm transition"
                 style={{
                   color: isActive ? "#2D6A4F" : "#555",
@@ -44,11 +51,11 @@ export default function Navbar({ current, onNav }: { current: string; onNav: (ta
       <div className="fixed bottom-4 left-4 right-4 z-50 md:hidden animate-slide-up-fade">
         <nav className="glass-panel flex items-center justify-around rounded-2xl pb-safe pt-2 px-2 shadow-premium" style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}>
         {NAV_ITEMS.map((n) => {
-          const isActive = current === n.id;
+          const isActive = current.startsWith(n.id);
           return (
             <button
               key={n.id}
-              onClick={() => onNav(n.id)}
+              onClick={() => navigate(`/${n.id}`)}
               className="flex flex-col items-center gap-1 p-2 transition group"
               style={{ color: isActive ? "#2D6A4F" : "#999" }}
             >

@@ -1,7 +1,7 @@
 // Vercel Serverless Function — AI Guide Chat
 // This replaces the Supabase Edge Function approach
 
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`;
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`;
 
 const GUIDE_PERSONAS = {
   vampire: `Kamu adalah Diablo, Sang Vampire — seorang penasihat abadi yang telah hidup berabad-abad dan menyaksikan setiap pola manusia berulang. 

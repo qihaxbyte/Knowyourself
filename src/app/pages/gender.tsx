@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { Gender } from "../flow";
+import { useAppStore } from "../store/useAppStore";
 
 const OPTS: { id: Gender; name: string; pronoun: string; sprite: string; bg: string }[] = [
   { id: "male", name: "Laki-laki", pronoun: "He/Him", sprite: "/assets/sprites/adventurer_male.png", bg: "#E0F4FF" },
@@ -8,8 +10,12 @@ const OPTS: { id: Gender; name: string; pronoun: string; sprite: string; bg: str
   { id: "spirit", name: "Spirit", pronoun: "Prefer not to say", sprite: "/assets/sprites/adventurer_spirit.png", bg: "#EDE7F6" },
 ];
 
-export default function GenderScreen({ onBack, onNext, initial }: { onBack: () => void; onNext: (g: Gender) => void; initial: Gender | null }) {
-  const [sel, setSel] = useState<Gender | null>(initial);
+export default function GenderScreen() {
+  const navigate = useNavigate();
+  const initialGender = useAppStore(state => state.gender);
+  const setGenderStore = useAppStore(state => state.setGender);
+  
+  const [sel, setSel] = useState<Gender | null>(initialGender);
   return (
     <div className="min-h-screen w-full pb-32" style={{ 
       backgroundImage: "linear-gradient(rgba(250,247,240, 0.65), rgba(250,247,240, 0.8)), url('/assets/bg/bg_pilih_area_night_1783274214753.png')",
@@ -19,7 +25,7 @@ export default function GenderScreen({ onBack, onNext, initial }: { onBack: () =
       fontFamily: "Inter, sans-serif" 
     }}>
       <div className="mx-auto max-w-2xl px-6 pt-8">
-        <button onClick={onBack} className="flex items-center gap-2 text-sm" style={{ color: "#555" }}><ArrowLeft className="h-4 w-4" /> Kembali</button>
+        <button onClick={() => navigate("/pilih")} className="flex items-center gap-2 text-sm" style={{ color: "#555" }}><ArrowLeft className="h-4 w-4" /> Kembali</button>
         <div className="mt-6 text-center">
           <h1 style={{ fontFamily: "'Crimson Text', serif", fontSize: 32, fontWeight: 700 }}>Siapa kamu?</h1>
           <p className="mt-2 text-sm" style={{ color: "#555" }}>Pilih gender atau identitas dirimu</p>
@@ -59,7 +65,12 @@ export default function GenderScreen({ onBack, onNext, initial }: { onBack: () =
 
       <div className="fixed bottom-0 left-0 right-0 border-t bg-white/95 backdrop-blur" style={{ borderColor: "#E8E0D5" }}>
         <div className="mx-auto flex max-w-2xl items-center justify-end px-6 py-4">
-          <button disabled={!sel} onClick={() => sel && onNext(sel)} className="inline-flex items-center gap-2 rounded-xl px-6 text-white transition disabled:opacity-40 hover:brightness-110" style={{ background: "#2D6A4F", height: 48, fontWeight: 600 }}>
+          <button disabled={!sel} onClick={() => {
+            if (sel) {
+              setGenderStore(sel);
+              navigate("/guide");
+            }
+          }} className="inline-flex items-center gap-2 rounded-xl px-6 text-white transition disabled:opacity-40 hover:brightness-110" style={{ background: "#2D6A4F", height: 48, fontWeight: 600 }}>
             Lanjut <ArrowRight className="h-4 w-4" />
           </button>
         </div>

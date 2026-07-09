@@ -1,10 +1,15 @@
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router";
 import { ArrowLeft, ArrowRight, Crown, ChevronLeft, ChevronRight } from "lucide-react";
 import { GUIDES, GUIDE_BG } from "../flow";
-import { GuideSprite } from "./guide-sprite";
+import { GuideSprite } from "../components/guide-sprite";
+import { useAppStore } from "../store/useAppStore";
 
-export default function GuideSelect({ onBack, onNext, initial }: { onBack: () => void; onNext: (id: string) => void; initial: string | null }) {
-  const [sel, setSel] = useState<string | null>(initial || "vampire");
+export default function GuideSelect() {
+  const navigate = useNavigate();
+  const initialGuide = useAppStore(state => state.guide);
+  const setGuideStore = useAppStore(state => state.setGuide);
+  const [sel, setSel] = useState<string | null>(initialGuide || "vampire");
   const scrollRef = useRef<HTMLDivElement>(null);
   const selGuide = GUIDES.find(g => g.id === sel);
   const bgUrl = sel && GUIDE_BG[sel] ? GUIDE_BG[sel] : "/assets/bg/bg_guide_1783273703509.png";
@@ -22,7 +27,7 @@ export default function GuideSelect({ onBack, onNext, initial }: { onBack: () =>
       </div>
 
       <div className="relative z-10 mx-auto max-w-3xl px-6 pt-8">
-        <button onClick={onBack} className="flex items-center gap-2 text-sm" style={{ color: "#555" }}><ArrowLeft className="h-4 w-4" /> Kembali</button>
+        <button onClick={() => navigate("/gender")} className="flex items-center gap-2 text-sm" style={{ color: "#555" }}><ArrowLeft className="h-4 w-4" /> Kembali</button>
         <div className="mt-6 text-center">
           <h1 style={{ fontFamily: "'Crimson Text', serif", fontSize: 32, fontWeight: 700 }}>Pilih Spirit Guide-mu</h1>
           <p className="mt-2 text-sm" style={{ color: "#555" }}>Mereka akan menemanimu sepanjang perjalanan ini</p>
@@ -132,7 +137,12 @@ export default function GuideSelect({ onBack, onNext, initial }: { onBack: () =>
 
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white/95 backdrop-blur" style={{ borderColor: "#E8E0D5" }}>
         <div className="mx-auto flex max-w-3xl items-center justify-end px-6 py-4 pb-safe">
-          <button disabled={!sel} onClick={() => sel && onNext(sel)} className="inline-flex items-center gap-2 rounded-xl px-6 text-white transition disabled:opacity-40 hover:brightness-110" style={{ background: "linear-gradient(90deg, #2D6A4F, #C9A84C)", height: 48, fontWeight: 600 }}>
+          <button disabled={!sel} onClick={() => {
+            if (sel) {
+              setGuideStore(sel);
+              navigate("/welcome");
+            }
+          }} className="inline-flex items-center gap-2 rounded-xl px-6 text-white transition disabled:opacity-40 hover:brightness-110" style={{ background: "linear-gradient(90deg, #2D6A4F, #C9A84C)", height: 48, fontWeight: 600 }}>
             Mulai Perjalanan! <ArrowRight className="h-4 w-4" />
           </button>
         </div>
