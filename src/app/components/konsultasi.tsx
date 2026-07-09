@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Send, Sparkles, AlertCircle } from "lucide-react";
 import { GUIDES, GUIDE_BG } from "../flow";
 import { GuideSprite } from "./guide-sprite";
-import { projectId, publicAnonKey } from "../../../utils/supabase/info";
 import type { AllResults } from "../scoring";
 
 type Msg = { role: "user" | "guide"; text: string; ts: number };
@@ -28,12 +27,11 @@ function buildResultSummary(results: AllResults): string {
 }
 
 async function callAI(guideId: string, result: string, history: Msg[]): Promise<string> {
-  const url = `https://${projectId}.supabase.co/functions/v1/chat`;
+  const url = `/api/chat`;
   const res = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${publicAnonKey}`,
     },
     body: JSON.stringify({
       guideId,
