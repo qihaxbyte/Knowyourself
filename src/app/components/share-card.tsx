@@ -134,7 +134,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
       const dataUrl = await toPng(cardRef.current, {
         pixelRatio: 3,
         width: 360,
-        height: 540,
+        height: 640,
         style: { opacity: "1", margin: "0", transform: "none" },
         cacheBust: true
       });
@@ -160,7 +160,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
       const dataUrl = await toPng(cardRef.current, {
         pixelRatio: 3,
         width: 360,
-        height: 540,
+        height: 640,
         style: { opacity: "1", margin: "0", transform: "none" },
         cacheBust: true
       });
@@ -191,18 +191,19 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
 
   const renderCardInner = () => (
     <>
-      {/* Background Image Layer - using img instead of CSS background for iOS Safari reliability */}
+      {/* Background Image Layer */}
       <img src={bgBase64Url} alt=""
         className="absolute inset-0 h-full w-full object-cover transition-all duration-500"
         style={{
-          filter: isBgBlurred ? "blur(6px)" : "none",
-          transform: isBgBlurred ? "scale(1.1)" : "scale(1)"
+          filter: isBgBlurred ? "blur(8px)" : "none",
+          transform: isBgBlurred ? "scale(1.12)" : "scale(1)"
         }}
       />
 
       {/* Soft Gradient Overlay for aesthetic text readability */}
       <div className="absolute inset-0 bg-black/10" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/80" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
 
       {/* Decorative sparkles */}
       {[...Array(15)].map((_, i) => (
@@ -217,83 +218,101 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
       ))}
 
       {/* Content Wrapper */}
-      <div className="relative z-10 flex h-full flex-col px-6 pt-5 pb-5 items-center">
+      <div className="relative z-10 flex h-full flex-col px-6 pt-6 pb-5 items-center">
 
-        {/* Header */}
-        <div className="inline-flex items-center gap-2 text-[8px] font-bold tracking-[0.35em] text-white/60 uppercase mt-1">
-          ✦ KnowYourself Soul Card ✦
+        {/* Elegant Top Header */}
+        <div className="flex w-full items-center justify-between opacity-80 mb-6">
+          <div className="text-[10px] font-black tracking-[0.4em] text-white" style={{ fontFamily: "Inter, sans-serif" }}>SOUL CARD</div>
+          <div className="flex gap-1">
+            {[...Array(3)].map((_, i) => <div key={i} className="h-1 w-1 rounded-full bg-white opacity-50" />)}
+          </div>
         </div>
 
-        {/* Avatar Section */}
-        <div className="mt-4 relative flex h-24 w-24 items-center justify-center rounded-full" style={{ border: `1px solid ${accent.color}44` }}>
-          <div className="absolute inset-0 rounded-full opacity-30 blur-2xl" style={{ background: accent.color }} />
-          <div className="relative z-10 drop-shadow-2xl scale-[0.85]">{avatarContent}</div>
-        </div>
-
-        <div className="mt-3 text-center">
-          <h3 className="font-serif text-[20px] font-bold text-white drop-shadow-md leading-none">
-            {customName.trim() ? customName : avatarName}
-          </h3>
-          <p className="mt-1 text-[8px] font-bold tracking-widest text-white/70 uppercase" style={{ fontFamily: "Inter, sans-serif" }}>{avatarDesc}</p>
-        </div>
-
-        {/* MBTI Title */}
-        <div className="mt-3 text-center">
-          <div className="text-[28px] font-black tracking-widest text-white leading-none" style={{ fontFamily: "'Press Start 2P', monospace", textShadow: `0 4px 15px ${accent.color}` }}>
+        {/* HUGE MBTI Title */}
+        <div className="mt-2 text-center w-full flex flex-col items-center justify-center relative">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-56 h-20 blur-[45px] rounded-full opacity-40 pointer-events-none" style={{ background: accent.color }}></div>
+          <div className="text-[46px] font-black tracking-widest text-white leading-none relative z-10" style={{ fontFamily: "'Press Start 2P', monospace", textShadow: `0 4px 20px ${accent.color}` }}>
             {primaryCode}
           </div>
           {primaryName && (
-            <div className="mt-1.5 font-serif text-[12px] italic text-white/90" style={{ textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}>
+            <div className="mt-3 font-serif text-[15px] italic text-white/95 relative z-10 font-medium tracking-wide" style={{ textShadow: "0 2px 4px rgba(0,0,0,0.8)" }}>
               "{primaryName}"
             </div>
           )}
         </div>
 
-        {/* Traits Ribbon */}
+        {/* Giant Glowing Avatar */}
+        <div className="mt-8 relative flex items-center justify-center">
+          <div className="absolute rounded-full opacity-40 blur-3xl animate-pulse" style={{ width: '160px', height: '160px', background: accent.color }} />
+          <div className="absolute rounded-full border opacity-50" style={{ width: '140px', height: '140px', borderColor: accent.color, transform: 'rotate(45deg)' }} />
+          <div className="absolute rounded-full border opacity-30" style={{ width: '155px', height: '155px', borderColor: 'white', transform: 'rotate(-15deg)' }} />
+          <div className="relative z-10 drop-shadow-2xl scale-[1.25]">{avatarContent}</div>
+        </div>
+
+        <div className="mt-9 text-center">
+          <h3 className="font-serif text-[24px] font-bold text-white drop-shadow-lg leading-none tracking-wide">
+            {customName.trim() ? customName : avatarName}
+          </h3>
+          <p className="mt-2 text-[9px] font-bold tracking-[0.25em] text-white/80 uppercase" style={{ fontFamily: "Inter, sans-serif" }}>{avatarDesc}</p>
+        </div>
+
+        {/* Traits Ribbon (Glassmorphism) */}
         {topTraits.length > 0 && (
-          <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+          <div className="mt-5 flex flex-wrap justify-center gap-2 px-2">
             {topTraits.map(t => (
-              <span key={t} className="px-2 py-0.5 text-[7px] font-bold tracking-widest text-white/90 shadow-sm uppercase rounded" style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.15)", fontFamily: "Inter, sans-serif" }}>
+              <span key={t} className="px-3.5 py-1.5 text-[9px] font-bold tracking-widest text-white shadow-xl uppercase rounded-xl backdrop-blur-md" 
+                    style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", fontFamily: "Inter, sans-serif" }}>
                 {t}
               </span>
             ))}
           </div>
         )}
 
-        {/* Radar Chart */}
-        {showRadar && cats.length >= 3 && (
-          <div className="mt-auto w-full flex justify-center items-center pt-1">
-            <div style={{ width: 140, height: 140 }}>
-              <MiniRadar cats={cats} results={categoryResults} accent={accent.color} />
+        {/* Spacer to push everything else down */}
+        <div className="flex-1" />
+
+        {/* Radar & Stats Section in a subtle glass container */}
+        <div className="w-full mt-4 rounded-[1.5rem] p-4 px-5 backdrop-blur-md relative overflow-hidden shadow-2xl" style={{ background: "rgba(0,0,0,0.35)", border: "1px solid rgba(255,255,255,0.15)" }}>
+          {/* subtle accent glow inside the box */}
+          <div className="absolute -right-8 -top-8 w-28 h-28 rounded-full blur-2xl opacity-40 pointer-events-none" style={{ background: accent.color }} />
+          
+          <div className="flex items-center justify-between h-[115px]">
+            {/* Stats Column */}
+            <div className="flex flex-col gap-3 w-1/2 pr-2">
+              {cats.slice(0, 4).map(c => {
+                const result = categoryResults[c.id];
+                return (
+                  <div key={c.id} className="flex flex-col border-l-[3px] pl-2.5" style={{ borderColor: accent.color }}>
+                    <span className="text-[8px] font-bold uppercase tracking-[0.15em] text-white/70" style={{ fontFamily: "Inter, sans-serif" }}>
+                      {SHORT_NAMES[c.id] || c.name}
+                    </span>
+                    <span className="text-[12px] font-black text-white leading-none mt-1 drop-shadow-md" style={{ fontFamily: "Inter, sans-serif" }}>
+                      {result?.code || "—"}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
-          </div>
-        )}
 
-        {/* Spacer if no radar */}
-        {(!showRadar || cats.length < 3) && <div className="flex-1" />}
-
-        {/* Stat Lines (Bottom) */}
-        <div className="mt-auto w-full pt-2">
-          <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-            {cats.map(c => {
-              const result = categoryResults[c.id];
-              return (
-                <div key={c.id} className="flex items-end justify-between border-b border-white/10 pb-1">
-                  <span className="text-[7.5px] font-bold uppercase tracking-widest text-white/60" style={{ fontFamily: "Inter, sans-serif" }}>
-                    {SHORT_NAMES[c.id] || c.name}
-                  </span>
-                  <span className="text-[10px] font-black text-white" style={{ fontFamily: "Inter, sans-serif" }}>
-                    {result?.code || "—"}
-                  </span>
-                </div>
-              );
-            })}
+            {/* Radar Chart */}
+            <div className="w-1/2 flex justify-center items-center">
+               {showRadar && cats.length >= 3 ? (
+                 <div style={{ width: 110, height: 110, transform: 'scale(1.15)' }}>
+                   <MiniRadar cats={cats} results={categoryResults} accent={accent.color} />
+                 </div>
+               ) : (
+                 <div className="text-center opacity-40">
+                   <Sparkles className="w-8 h-8 mx-auto mb-1 text-white" />
+                   <div className="text-[8px]">ANALYZING...</div>
+                 </div>
+               )}
+            </div>
           </div>
         </div>
 
         {/* Footer Watermark */}
-        <div className="mt-4 text-center w-full">
-          <div className="text-[7px] font-bold tracking-[0.4em] text-white/30">KNOWYOURSELF.ID</div>
+        <div className="mt-5 text-center w-full pb-1">
+          <div className="text-[8px] font-bold tracking-[0.4em] text-white/50">WWW.KNOWYOURSELF.ID</div>
         </div>
 
       </div>
@@ -307,7 +326,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
         <div
           ref={cardRef}
           className="relative shrink-0 overflow-hidden rounded-3xl bg-gray-900"
-          style={{ width: 360, height: 540, transform: "none" }}
+          style={{ width: 360, height: 640, transform: "none" }}
         >
           {renderCardInner()}
         </div>
@@ -319,12 +338,12 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
         <div className="flex flex-1 items-center justify-center overflow-hidden rounded-3xl bg-gray-900 p-4 lg:p-8" style={{ minHeight: "80vh" }}>
 
           {/* Card Wrapper for responsive scaling */}
-          <div className="relative flex items-center justify-center w-full max-w-[360px]" style={{ aspectRatio: "360/540" }}>
+          <div className="relative flex items-center justify-center w-full max-w-[360px]" style={{ aspectRatio: "360/640" }}>
             <div
-              className="absolute shrink-0 overflow-hidden rounded-3xl shadow-2xl origin-center bg-gray-900"
+              className="absolute shrink-0 overflow-hidden rounded-[2.5rem] shadow-2xl origin-center bg-gray-900"
               style={{
                 width: 360,
-                height: 540,
+                height: 640,
                 // Responsive scale for preview ONLY
                 transform: "scale(min(1, calc((100vw - 32px) / 360)))"
               }}
