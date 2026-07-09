@@ -70,6 +70,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
   const [isBgBlurred, setIsBgBlurred] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [configTab, setConfigTab] = useState<"bg" | "accent" | "content">("bg");
+  const [generatedImgUrl, setGeneratedImgUrl] = useState<string | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const bg = BACKGROUNDS.find(b => b.id === selectedBg)!;
@@ -120,22 +121,17 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
   const handleDownload = async () => {
     if (!cardRef.current) return;
     setIsExporting(true);
-
-    // Tiny delay to ensure React rendering is totally settled
     await new Promise(res => setTimeout(res, 100));
-
     try {
-      const dataUrl = await toPng(cardRef.current, {
-        pixelRatio: 3,
-        style: { transform: "none" }
-      });
+      const dataUrl = await toPng(cardRef.current, { pixelRatio: 3, style: { transform: "none" }, cacheBust: true });
+      setGeneratedImgUrl(dataUrl);
       const link = document.createElement("a");
       link.download = `SoulCard_${primaryCode}.png`;
       link.href = dataUrl;
       link.click();
     } catch (err) {
       console.error("Export failed", err);
-      alert("Maaf, terjadi kesalahan saat mengunduh gambar.");
+      alert("Maaf, terjadi kesalahan saat memproses gambar.");
     }
     setIsExporting(false);
   };
@@ -144,15 +140,11 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
     if (!cardRef.current) return;
     setIsExporting(true);
     await new Promise(res => setTimeout(res, 100));
-
     try {
-      const blob = await toBlob(cardRef.current, {
-        pixelRatio: 3,
-        style: { transform: "none" }
-      });
-      
-      if (!blob) throw new Error("Failed to generate blob");
-      
+      const dataUrl = await toPng(cardRef.current, { pixelRatio: 3, style: { transform: "none" }, cacheBust: true });
+      setGeneratedImgUrl(dataUrl);
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
       const file = new File([blob], `SoulCard_${primaryCode}.png`, { type: "image/png" });
 
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -162,8 +154,6 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
           files: [file],
         });
       } else {
-        // Fallback ke download jika share tidak didukung
-        const dataUrl = await toPng(cardRef.current, { pixelRatio: 3, style: { transform: "none" } });
         const link = document.createElement("a");
         link.download = `SoulCard_${primaryCode}.png`;
         link.href = dataUrl;
@@ -171,7 +161,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
       }
     } catch (err) {
       console.error("Share failed", err);
-      alert("Browser Anda tidak mendukung fitur berbagi ini, atau terjadi kesalahan.");
+      alert("Gagal membagikan. Anda bisa mengunduh gambar secara manual.");
     }
     setIsExporting(false);
   };
@@ -468,6 +458,30 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
         </div>
       </div>
 
+      {generatedImgUrl && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/90 p-4 backdrop-blur-sm animate-fade-in">
+          <button 
+            onClick={() => setGeneratedImgUrl(null)}
+            className="absolute right-4 top-4 rounded-full bg-white/20 p-2 text-white hover:bg-white/30 transition-colors"
+          >
+            <X className="h-6 w-6" />
+          </button>
+          
+          <div className="text-center mb-6 max-w-sm">
+            <h3 className="font-serif text-2xl font-bold text-white mb-2">Soul Card Siap!</h3>
+            <p className="text-sm text-gray-300 bg-white/10 p-3 rounded-xl border border-white/20">
+              Jika unduhan tidak otomatis berjalan, <strong className="text-emerald-400">Tekan tahan gambar di bawah ini</strong> lalu pilih "Simpan Gambar" / "Save Image".
+            </p>
+          </div>
+          
+          <img 
+            src={generatedImgUrl} 
+            alt="Your Soul Card" 
+            className="max-h-[60vh] w-auto max-w-full rounded-2xl shadow-2xl" 
+          />
+        </div>
+      )}
+
       <style>{`
         @keyframes sparkle { 0%,100% { opacity: 0.2; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
         @keyframes fade-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -496,7 +510,7 @@ function MiniRadar({ cats, results, accent }: { cats: typeof CATEGORIES; results
   const path = points.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ") + "Z";
 
   return (
-    <svg viewBox="0 0 150 150" style={{ width: "100%", height: "100%", overflow: "visible" }}>
+    <svg width={150} height={150} viewBox="0 0 150 150" style={{ width: "100%", height: "100%", overflow: "visible" }}>
       {[0.33, 0.66, 1].map(s => (
         <polygon key={s} points={Array.from({ length: n }, (_, i) => {
           const a = (i / n) * Math.PI * 2 - Math.PI / 2;
