@@ -132,7 +132,14 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
         pixelRatio: 3, 
         width: 360,
         height: 720,
-        style: { margin: "0" }, 
+        style: { 
+          transform: "none", 
+          margin: "0", 
+          position: "absolute", 
+          left: "0", 
+          top: "0",
+          right: "auto" 
+        }, 
         cacheBust: true 
       });
       setGeneratedImgUrl(dataUrl);
@@ -162,7 +169,14 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
         pixelRatio: 3, 
         width: 360,
         height: 720,
-        style: { margin: "0" }, 
+        style: { 
+          transform: "none", 
+          margin: "0", 
+          position: "absolute", 
+          left: "0", 
+          top: "0",
+          right: "auto" 
+        }, 
         cacheBust: true 
       });
       setGeneratedImgUrl(dataUrl);
