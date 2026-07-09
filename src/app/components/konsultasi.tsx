@@ -3,6 +3,7 @@ import { ArrowLeft, Send, Sparkles, AlertCircle } from "lucide-react";
 import { GUIDES, GUIDE_BG } from "../flow";
 import { GuideSprite } from "./guide-sprite";
 import { projectId, publicAnonKey } from "../../../utils/supabase/info";
+import type { AllResults } from "../scoring";
 
 type Msg = { role: "user" | "guide"; text: string; ts: number };
 
@@ -13,8 +14,21 @@ const STARTERS = [
   "Apa kekuatan tersembunyiku?",
 ];
 
+function buildResultSummary(results: AllResults): string {
+  const lines: string[] = [];
+  for (const [catId, r] of Object.entries(results)) {
+    if (!r) continue;
+    lines.push(`[${r.categoryId || catId}] ${r.code} — ${r.name}`);
+    if (r.strengths?.length) lines.push(`  Kekuatan: ${r.strengths.join(", ")}`);
+    if (r.weaknesses?.length) lines.push(`  Kelemahan: ${r.weaknesses.join(", ")}`);
+    if (r.traits?.length) lines.push(`  Traits: ${r.traits.join(", ")}`);
+    if (r.description) lines.push(`  Deskripsi: ${r.description}`);
+  }
+  return lines.join("\n") || "Belum ada hasil tes.";
+}
+
 async function callAI(guideId: string, result: string, history: Msg[]): Promise<string> {
-  const url = `https://${projectId}.supabase.co/functions/v1/make-server-70260bbd/chat`;
+  const url = `https://${projectId}.supabase.co/functions/v1/chat`;
   const res = await fetch(url, {
     method: "POST",
     headers: {
@@ -24,7 +38,7 @@ async function callAI(guideId: string, result: string, history: Msg[]): Promise<
     body: JSON.stringify({
       guideId,
       result,
-      history: history.map((m) => ({ role: m.role, text: m.text })),
+      history: history.map((m) => ({ role: m.role === "guide" ? "model" : "user", text: m.text })),
     }),
   });
   const data = await res.json();
@@ -35,10 +49,12 @@ async function callAI(guideId: string, result: string, history: Msg[]): Promise<
   return data.reply as string;
 }
 
-export default function Konsultasi({ guideId, result, onBack }: { guideId: string; result: string; onBack: () => void }) {
+export default function Konsultasi({ guideId, categoryResults, onBack }: { guideId: string; categoryResults: AllResults; onBack: () => void }) {
   const guide = GUIDES.find(g => g.id === guideId)!;
+  const resultSummary = buildResultSummary(categoryResults);
+  const primaryCode = categoryResults?.kepribadian?.code || "—";
   const [messages, setMessages] = useState<Msg[]>([
-    { role: "guide", text: `Halo... aku ${guide.name}. ✨\nAku sudah membaca hasilmu — ${result}. Ada hal yang ingin kamu bicarakan? Apapun, aku di sini.`, ts: Date.now() },
+    { role: "guide", text: `Halo... aku ${guide.name}. ✨\nAku sudah membaca hasilmu — ${primaryCode}. Ada hal yang ingin kamu bicarakan? Apapun, aku di sini.`, ts: Date.now() },
   ]);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
@@ -58,7 +74,7 @@ export default function Konsultasi({ guideId, result, onBack }: { guideId: strin
     setTyping(true);
     setError(null);
     try {
-      const reply = await callAI(guideId, result, nextHistory);
+      const reply = await callAI(guideId, resultSummary, nextHistory);
       setMessages((m) => [...m, { role: "guide", text: reply, ts: Date.now() }]);
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);

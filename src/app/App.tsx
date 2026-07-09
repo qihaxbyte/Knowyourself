@@ -237,7 +237,7 @@ export default function App() {
       return requireTest(
         <Konsultasi
           guideId={guide || "vampire"}
-          result={categoryResults.kepribadian?.code || "INFJ"}
+          categoryResults={categoryResults}
           onBack={() => setScreen("perjalanan")}
         />,
         "guide-chat"
