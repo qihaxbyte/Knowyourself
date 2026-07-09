@@ -13,7 +13,7 @@ import Navbar from "./components/navbar";
 import Profil from "./components/profil";
 import Perjalanan from "./components/perjalanan";
 import PreTestPrompt from "./components/not-tested";
-import { CATEGORIES, Gender, Screen, type AnswerEntry, type GuideMatch, computeGuideMatch, QuizAnswers } from "./flow";
+import { CATEGORIES, Gender, Screen, type AnswerEntry, type GuideMatch, computeGuideMatch, QuizAnswers, GUIDES, GUIDE_BG } from "./flow";
 import { computeAllResults, type AllResults } from "./scoring";
 
 function useLocalStorage<T>(key: string, initialValue: T) {
@@ -37,6 +37,29 @@ function useLocalStorage<T>(key: string, initialValue: T) {
 
   return [storedValue, setStoredValue] as const;
 }
+
+const Preloader = () => {
+  useEffect(() => {
+    // Preload critical backgrounds and sprites in the background
+    const imagesToPreload = [
+      "/assets/bg/bg_mystic_forest.png",
+      "/assets/bg/bg_golden_sunset.png",
+      ...Object.values(GUIDE_BG),
+      ...GUIDES.map(g => `/assets/sprites/${g.id}.png`)
+    ];
+
+    // Give priority to other network requests by delaying slightly
+    setTimeout(() => {
+      imagesToPreload.forEach(src => {
+        if (src) {
+          const img = new window.Image();
+          img.src = src;
+        }
+      });
+    }, 1000);
+  }, []);
+  return null;
+};
 
 export default function App() {
   const [screen, setScreenState] = useState<Screen>(() => {
@@ -101,15 +124,20 @@ export default function App() {
 
   switch (screen) {
     case "landing":
-      return withNav(
-        <LandingPage
-          onStart={() => setScreen("pilih")}
-          onNav={(navTarget) => {
-            const map: Record<string, string> = { "Koneksi": "koneksi", "Perjalanan": "perjalanan", "Guide": "guide-chat", "Profil": "profil" };
-            if (map[navTarget]) handleNav(map[navTarget]);
-          }}
-        />,
-        "landing"
+      return (
+        <>
+          <Preloader />
+          {withNav(
+            <LandingPage
+              onStart={() => setScreen("pilih")}
+              onNav={(navTarget) => {
+                const map: Record<string, string> = { "Koneksi": "koneksi", "Perjalanan": "perjalanan", "Guide": "guide-chat", "Profil": "profil" };
+                if (map[navTarget]) handleNav(map[navTarget]);
+              }}
+            />,
+            "landing"
+          )}
+        </>
       );
     case "pilih":
       return (
