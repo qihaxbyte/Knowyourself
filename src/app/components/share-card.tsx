@@ -69,6 +69,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
   const [customName, setCustomName] = useState("");
   const [isBgBlurred, setIsBgBlurred] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [isCapturing, setIsCapturing] = useState(false);
   const [configTab, setConfigTab] = useState<"bg" | "accent" | "content">("bg");
   const [generatedImgUrl, setGeneratedImgUrl] = useState<string | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -121,13 +122,17 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
   const handleDownload = async () => {
     if (!cardRef.current) return;
     setIsExporting(true);
-    await new Promise(res => setTimeout(res, 100));
+    setIsCapturing(true);
+    
+    // Wait for React to remove the scale and for the DOM to settle
+    await new Promise(res => setTimeout(res, 150));
+    
     try {
       const dataUrl = await toPng(cardRef.current, { 
         pixelRatio: 3, 
         width: 360,
         height: 720,
-        style: { transform: "none", margin: "0" }, 
+        style: { margin: "0" }, 
         cacheBust: true 
       });
       setGeneratedImgUrl(dataUrl);
@@ -139,19 +144,25 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
       console.error("Export failed", err);
       alert("Maaf, terjadi kesalahan saat memproses gambar.");
     }
+    
+    setIsCapturing(false);
     setIsExporting(false);
   };
 
   const handleShare = async () => {
     if (!cardRef.current) return;
     setIsExporting(true);
-    await new Promise(res => setTimeout(res, 100));
+    setIsCapturing(true);
+    
+    // Wait for React to remove the scale and for the DOM to settle
+    await new Promise(res => setTimeout(res, 150));
+    
     try {
       const dataUrl = await toPng(cardRef.current, { 
         pixelRatio: 3, 
         width: 360,
         height: 720,
-        style: { transform: "none", margin: "0" }, 
+        style: { margin: "0" }, 
         cacheBust: true 
       });
       setGeneratedImgUrl(dataUrl);
@@ -175,6 +186,8 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
       console.error("Share failed", err);
       alert("Gagal membagikan. Anda bisa mengunduh gambar secara manual.");
     }
+    
+    setIsCapturing(false);
     setIsExporting(false);
   };
 
@@ -309,8 +322,8 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
               style={{
                 width: 360,
                 height: 720,
-                // Responsive scale for preview ONLY
-                transform: "scale(min(1, calc((100vw - 32px) / 360)))"
+                // Remove scale during capture to prevent html-to-image from miscalculating the X/Y bounding rect
+                transform: isCapturing ? "none" : "scale(min(1, calc((100vw - 32px) / 360)))"
               }}
             >
               {renderCardInner()}
