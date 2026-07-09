@@ -152,7 +152,7 @@ export default function Quiz() {
       setForcedSel(null);
       setEssay("");
       if (nextQ.type === "scale") {
-        setScaleVals(nextQ.statements.map(() => 5));
+        setScaleVals(nextQ.statements.map(() => 5.5));
         setScaleTouched(nextQ.statements.map(() => false));
       } else {
         setScaleVals([]);
@@ -369,7 +369,7 @@ export default function Quiz() {
                   <div className="text-sm">{s}</div>
                   <div className="mt-4">
                     <ScaleSlider
-                      value={scaleVals[i] ?? 5}
+                      value={scaleVals[i] ?? 5.5}
                       categoryColor={categoryColor}
                       touched={scaleTouched[i]}
                       onInteract={() => {
@@ -398,7 +398,7 @@ export default function Quiz() {
                         className="text-sm font-bold mt-1"
                         style={{ color: categoryColor, opacity: scaleTouched[i] ? 1 : 0.4 }}
                       >
-                        {Math.round(scaleVals[i] ?? 5)}
+                        {scaleTouched[i] ? Math.round(scaleVals[i] ?? 5.5) : "—"}
                       </span>
                       <span className="text-[11px] font-medium leading-tight w-20 text-right" style={{ color: "#999" }}>
                         Sangat setuju
