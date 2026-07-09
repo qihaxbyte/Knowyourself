@@ -134,7 +134,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
       const dataUrl = await toPng(cardRef.current, {
         pixelRatio: 3,
         width: 360,
-        height: 640,
+        height: 720,
         style: { opacity: "1", margin: "0", transform: "none" },
         cacheBust: true
       });
@@ -160,7 +160,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
       const dataUrl = await toPng(cardRef.current, {
         pixelRatio: 3,
         width: 360,
-        height: 640,
+        height: 720,
         style: { opacity: "1", margin: "0", transform: "none" },
         cacheBust: true
       });
@@ -192,7 +192,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
   const renderCardInner = () => (
     <>
       {/* Background Image Layer - using img instead of CSS background for iOS Safari reliability */}
-      <img src={bgBase64Url} alt="" 
+      <img src={bgBase64Url} alt=""
         className="absolute inset-0 h-full w-full object-cover transition-all duration-500"
         style={{
           filter: isBgBlurred ? "blur(6px)" : "none",
@@ -217,33 +217,33 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
       ))}
 
       {/* Content Wrapper */}
-      <div className="relative z-10 flex h-full flex-col px-6 pt-6 pb-8 items-center">
+      <div className="relative z-10 flex h-full flex-col px-6 pt-5 pb-5 items-center">
 
         {/* Header */}
-        <div className="inline-flex items-center gap-2 text-[8px] font-bold tracking-[0.35em] text-white/60 uppercase mt-2">
+        <div className="inline-flex items-center gap-2 text-[8px] font-bold tracking-[0.35em] text-white/60 uppercase mt-1">
           ✦ KnowYourself Soul Card ✦
         </div>
 
         {/* Avatar Section */}
-        <div className="mt-6 relative flex h-28 w-28 items-center justify-center rounded-full" style={{ border: `1px solid ${accent.color}44` }}>
+        <div className="mt-4 relative flex h-24 w-24 items-center justify-center rounded-full" style={{ border: `1px solid ${accent.color}44` }}>
           <div className="absolute inset-0 rounded-full opacity-30 blur-2xl" style={{ background: accent.color }} />
-          <div className="relative z-10 drop-shadow-2xl">{avatarContent}</div>
+          <div className="relative z-10 drop-shadow-2xl scale-[0.85]">{avatarContent}</div>
         </div>
 
-        <div className="mt-4 text-center">
-          <h3 className="font-serif text-[22px] font-bold text-white drop-shadow-md">
+        <div className="mt-3 text-center">
+          <h3 className="font-serif text-[20px] font-bold text-white drop-shadow-md leading-none">
             {customName.trim() ? customName : avatarName}
           </h3>
-          <p className="mt-0.5 text-[8.5px] font-bold tracking-widest text-white/70 uppercase" style={{ fontFamily: "Inter, sans-serif" }}>{avatarDesc}</p>
+          <p className="mt-1 text-[8px] font-bold tracking-widest text-white/70 uppercase" style={{ fontFamily: "Inter, sans-serif" }}>{avatarDesc}</p>
         </div>
 
         {/* MBTI Title */}
-        <div className="mt-4 text-center">
-          <div className="text-[36px] font-black tracking-widest text-white leading-none" style={{ fontFamily: "'Press Start 2P', monospace", textShadow: `0 4px 20px ${accent.color}` }}>
+        <div className="mt-3 text-center">
+          <div className="text-[28px] font-black tracking-widest text-white leading-none" style={{ fontFamily: "'Press Start 2P', monospace", textShadow: `0 4px 15px ${accent.color}` }}>
             {primaryCode}
           </div>
           {primaryName && (
-            <div className="mt-2 font-serif text-[14px] italic text-white/90" style={{ textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}>
+            <div className="mt-1.5 font-serif text-[12px] italic text-white/90" style={{ textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}>
               "{primaryName}"
             </div>
           )}
@@ -251,9 +251,9 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
 
         {/* Traits Ribbon */}
         {topTraits.length > 0 && (
-          <div className="mt-4 flex flex-wrap justify-center gap-2">
+          <div className="mt-3 flex flex-wrap justify-center gap-1.5">
             {topTraits.map(t => (
-              <span key={t} className="px-2.5 py-1 text-[8px] font-bold tracking-widest text-white/90 shadow-sm uppercase rounded" style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.15)", fontFamily: "Inter, sans-serif" }}>
+              <span key={t} className="px-2 py-0.5 text-[7px] font-bold tracking-widest text-white/90 shadow-sm uppercase rounded" style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.15)", fontFamily: "Inter, sans-serif" }}>
                 {t}
               </span>
             ))}
@@ -262,8 +262,8 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
 
         {/* Radar Chart */}
         {showRadar && cats.length >= 3 && (
-          <div className="mt-auto w-full flex justify-center items-center pt-2">
-            <div style={{ width: 150, height: 150 }}>
+          <div className="mt-auto w-full flex justify-center items-center pt-1">
+            <div style={{ width: 140, height: 140 }}>
               <MiniRadar cats={cats} results={categoryResults} accent={accent.color} />
             </div>
           </div>
@@ -273,16 +273,16 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
         {(!showRadar || cats.length < 3) && <div className="flex-1" />}
 
         {/* Stat Lines (Bottom) */}
-        <div className="mt-auto w-full pt-4">
-          <div className="grid grid-cols-2 gap-x-8 gap-y-2.5">
+        <div className="mt-auto w-full pt-2">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-2">
             {cats.map(c => {
               const result = categoryResults[c.id];
               return (
                 <div key={c.id} className="flex items-end justify-between border-b border-white/10 pb-1">
-                  <span className="text-[8px] font-bold uppercase tracking-widest text-white/60" style={{ fontFamily: "Inter, sans-serif" }}>
+                  <span className="text-[7.5px] font-bold uppercase tracking-widest text-white/60" style={{ fontFamily: "Inter, sans-serif" }}>
                     {SHORT_NAMES[c.id] || c.name}
                   </span>
-                  <span className="text-[11px] font-black text-white" style={{ fontFamily: "Inter, sans-serif" }}>
+                  <span className="text-[10px] font-black text-white" style={{ fontFamily: "Inter, sans-serif" }}>
                     {result?.code || "—"}
                   </span>
                 </div>
@@ -292,7 +292,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
         </div>
 
         {/* Footer Watermark */}
-        <div className="mt-6 mb-2 text-center w-full">
+        <div className="mt-4 text-center w-full">
           <div className="text-[7px] font-bold tracking-[0.4em] text-white/30">KNOWYOURSELF.ID</div>
         </div>
 
@@ -307,7 +307,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
         <div
           ref={cardRef}
           className="relative shrink-0 overflow-hidden rounded-3xl bg-gray-900"
-          style={{ width: 360, height: 640, transform: "none" }}
+          style={{ width: 360, height: 720, transform: "none" }}
         >
           {renderCardInner()}
         </div>
@@ -319,12 +319,12 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
         <div className="flex flex-1 items-center justify-center overflow-hidden rounded-3xl bg-gray-900 p-4 lg:p-8" style={{ minHeight: "80vh" }}>
 
           {/* Card Wrapper for responsive scaling */}
-          <div className="relative flex items-center justify-center w-full max-w-[360px]" style={{ aspectRatio: "360/640" }}>
+          <div className="relative flex items-center justify-center w-full max-w-[360px]" style={{ aspectRatio: "360/720" }}>
             <div
               className="absolute shrink-0 overflow-hidden rounded-3xl shadow-2xl origin-center bg-gray-900"
               style={{
                 width: 360,
-                height: 640,
+                height: 720,
                 // Responsive scale for preview ONLY
                 transform: "scale(min(1, calc((100vw - 32px) / 360)))"
               }}
@@ -511,7 +511,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
             </p>
           </div>
 
-                    <img
+          <img
             src={generatedImgUrl}
             alt="Your Soul Card"
             className="max-h-[60vh] w-auto max-w-full rounded-2xl shadow-2xl mb-4"
