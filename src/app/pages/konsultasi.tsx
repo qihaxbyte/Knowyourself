@@ -190,7 +190,7 @@ export default function Konsultasi() {
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input); } }}
             placeholder={`Tanya apapun pada ${guide.name}...`}
             rows={1}
-            className="max-h-32 flex-1 resize-none rounded-2xl border px-4 py-3.5 text-sm outline-none transition focus:border-opacity-100 shadow-inner"
+            className="max-h-32 flex-1 resize-none rounded-2xl border px-4 py-3.5 text-base outline-none transition focus:border-opacity-100 shadow-inner"
             style={{ borderColor: `${guide.color}55`, background: "rgba(255,255,255,0.85)" }}
           />
           <button

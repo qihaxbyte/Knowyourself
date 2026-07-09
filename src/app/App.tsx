@@ -48,14 +48,14 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const RequireTest = ({ children }: { children: React.ReactNode }) => {
+const RequireTest = ({ children, withLayout = true }: { children: React.ReactNode, withLayout?: boolean }) => {
   const guideMatches = useAppStore(state => state.guideMatches);
   const guide = useAppStore(state => state.guide);
   
   if (guideMatches.length === 0 || !guide) {
     return <Layout><PreTestPrompt /></Layout>;
   }
-  return <Layout>{children}</Layout>;
+  return withLayout ? <Layout>{children}</Layout> : <>{children}</>;
 };
 
 const RequireSetup = ({ children, withLayout = true }: { children: React.ReactNode, withLayout?: boolean }) => {
@@ -87,7 +87,7 @@ export default function App() {
         <Route path="/loading" element={<RequireSetup withLayout={false}><Loading /></RequireSetup>} />
         
         <Route path="/perjalanan" element={<RequireTest><Hasil /></RequireTest>} />
-        <Route path="/guide-chat" element={<RequireTest><Konsultasi /></RequireTest>} />
+        <Route path="/guide-chat" element={<RequireTest withLayout={false}><Konsultasi /></RequireTest>} />
         <Route path="/koneksi" element={<Layout><Koneksi /></Layout>} />
         <Route path="/profil" element={<Layout><Profil /></Layout>} />
         
