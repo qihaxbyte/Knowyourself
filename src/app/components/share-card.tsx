@@ -3,7 +3,7 @@ import { X, Download, Share2, Image, Palette, User, Sparkles, Check, ChevronLeft
 import { GUIDES, CATEGORIES, type Gender, GUIDE_BG } from "../flow";
 import { GuideSprite } from "./guide-sprite";
 import type { AllResults } from "../scoring";
-import html2canvas from "html2canvas";
+import { toPng, toBlob } from "html-to-image";
 
 const SHORT_NAMES: Record<string, string> = {
   kepribadian: "Kepribadian",
@@ -135,14 +135,13 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
     await new Promise(res => setTimeout(res, 100));
     
     try {
-      const canvas = await html2canvas(cardRef.current, {
-        scale: 3,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: null,
+      const dataUrl = await toPng(cardRef.current, { 
+        pixelRatio: 3, 
+        width: 360,
+        height: 720,
+        style: { margin: "0", transform: "none" }, 
+        cacheBust: true 
       });
-      const dataUrl = canvas.toDataURL("image/png");
-      
       setGeneratedImgUrl(dataUrl);
       const link = document.createElement("a");
       link.download = `SoulCard_${primaryCode}.png`;
@@ -162,14 +161,13 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
     await new Promise(res => setTimeout(res, 100));
     
     try {
-      const canvas = await html2canvas(cardRef.current, {
-        scale: 3,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: null,
+      const dataUrl = await toPng(cardRef.current, { 
+        pixelRatio: 3, 
+        width: 360,
+        height: 720,
+        style: { margin: "0", transform: "none" }, 
+        cacheBust: true 
       });
-      const dataUrl = canvas.toDataURL("image/png");
-
       setGeneratedImgUrl(dataUrl);
       const res = await fetch(dataUrl);
       const blob = await res.blob();
@@ -201,7 +199,6 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
       <img
         src={bgBase64Url!}
         alt=""
-        crossOrigin="anonymous"
         className="absolute inset-0 h-full w-full object-cover transition-all duration-500"
         style={{
           filter: isBgBlurred ? "blur(6px)" : "none",
