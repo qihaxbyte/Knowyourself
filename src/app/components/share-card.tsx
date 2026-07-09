@@ -126,7 +126,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
       const dataUrl = await toPng(cardRef.current, { 
         pixelRatio: 3, 
         width: 360,
-        height: 700,
+        height: 720,
         style: { transform: "none", margin: "0" }, 
         cacheBust: true 
       });
@@ -150,7 +150,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
       const dataUrl = await toPng(cardRef.current, { 
         pixelRatio: 3, 
         width: 360,
-        height: 700,
+        height: 720,
         style: { transform: "none", margin: "0" }, 
         cacheBust: true 
       });
@@ -209,7 +209,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
       ))}
 
       {/* Content Wrapper */}
-      <div className="relative z-10 flex h-full flex-col p-6 items-center">
+      <div className="relative z-10 flex h-full flex-col px-6 pt-6 pb-8 items-center">
         
         {/* Header */}
         <div className="inline-flex items-center gap-2 text-[8px] font-bold tracking-[0.35em] text-white/60 uppercase mt-2">
@@ -284,7 +284,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
         </div>
 
         {/* Footer Watermark */}
-        <div className="mt-5 text-center w-full">
+        <div className="mt-6 mb-2 text-center w-full">
           <div className="text-[7px] font-bold tracking-[0.4em] text-white/30">KNOWYOURSELF.ID</div>
         </div>
 
@@ -302,13 +302,13 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
         <div className="flex flex-1 items-center justify-center overflow-hidden rounded-3xl bg-gray-900 p-4 lg:p-8" style={{ minHeight: "80vh" }}>
 
           {/* Card Wrapper for responsive scaling */}
-          <div className="relative flex items-center justify-center w-full max-w-[360px]" style={{ aspectRatio: "360/700" }}>
+          <div className="relative flex items-center justify-center w-full max-w-[360px]" style={{ aspectRatio: "360/720" }}>
             <div
               ref={cardRef}
               className="absolute shrink-0 overflow-hidden rounded-3xl shadow-2xl origin-center bg-gray-900"
               style={{
                 width: 360,
-                height: 700,
+                height: 720,
                 // Responsive scale for preview ONLY
                 transform: "scale(min(1, calc((100vw - 32px) / 360)))"
               }}
