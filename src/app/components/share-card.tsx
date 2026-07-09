@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { X, Download, Share2, Image, Palette, User, Sparkles, Check, ChevronLeft, ChevronRight, Crown } from "lucide-react";
 import { GUIDES, CATEGORIES, type Gender, GUIDE_BG } from "../flow";
 import { GuideSprite } from "./guide-sprite";
@@ -61,6 +61,25 @@ type ShareCardProps = {
   gender: Gender | null;
 };
 
+// ──────────────────────────────────────────────
+// HOOK FOR SAFARI BASE64 CONVERSION
+// ──────────────────────────────────────────────
+function useBase64Image(url: string | null) {
+  const [base64, setBase64] = useState<string>("");
+  useEffect(() => {
+    if (!url) return;
+    fetch(url)
+      .then((res) => res.blob())
+      .then((blob) => {
+        const reader = new FileReader();
+        reader.onloadend = () => setBase64(reader.result as string);
+        reader.readAsDataURL(blob);
+      })
+      .catch((err) => console.error("Failed to fetch base64 image", err));
+  }, [url]);
+  return base64 || url;
+}
+
 export default function ShareCard({ guideId, bestGuideId, categoryResults, selectedCats, gender }: ShareCardProps) {
   const [selectedBg, setSelectedBg] = useState(BACKGROUNDS[0].id);
   const [selectedAccent, setSelectedAccent] = useState(ACCENT_COLORS[0].id);
@@ -83,6 +102,8 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
   const primaryName = mbtiResult?.name || "";
   const topTraits = Object.values(categoryResults).flatMap(r => r.traits).slice(0, 4);
 
+  const bgBase64Url = useBase64Image(bg.url);
+
   // Determine Avatar Data
   let avatarName = "";
   let avatarDesc = "";
@@ -97,18 +118,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
 
     avatarName = "Adventurer";
     avatarDesc = "Adventurer";
-    avatarContent = (
-      <img
-        src={mbtiSprite}
-        onError={(e) => {
-          e.currentTarget.src = defaultSprite;
-          e.currentTarget.onerror = null;
-        }}
-        alt="Adventurer"
-        className="h-28 w-28 object-contain"
-        style={{ imageRendering: "pixelated" }}
-      />
-    );
+    avatarContent = <AdventurerAvatar src={mbtiSprite} fallback={defaultSprite} />;
   } else {
     const activeGuideId = avatarMode === "best" ? bestGuideId : guideId;
     const activeGuide = GUIDES.find(g => g.id === activeGuideId);
@@ -195,7 +205,7 @@ export default function ShareCard({ guideId, bestGuideId, categoryResults, selec
     <>
       {/* Background Image Layer - using img instead of CSS background for iOS Safari reliability */}
       <img
-        src={bg.url}
+        src={bgBase64Url!}
         alt=""
         crossOrigin="anonymous"
         className="absolute inset-0 h-full w-full object-cover transition-all duration-500"
@@ -568,5 +578,26 @@ function MiniRadar({ cats, results, accent }: { cats: typeof CATEGORIES; results
         return <text key={i} x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" fontSize={6.5} fill="rgba(255,255,255,0.9)" fontWeight={700} fontFamily="Inter, sans-serif" letterSpacing="0.1em" style={{ textShadow: "0 2px 4px rgba(0,0,0,0.8)" }}>{(SHORT_NAMES[c.id] || c.name).toUpperCase()}</text>;
       })}
     </svg>
+  );
+}
+
+// ──────────────────────────────────────────────
+// ADVENTURER AVATAR COMPONENT (For Base64)
+// ──────────────────────────────────────────────
+function AdventurerAvatar({ src, fallback }: { src: string, fallback: string }) {
+  const [useFallback, setUseFallback] = useState(false);
+  const currentUrl = useFallback ? fallback : src;
+  const base64Url = useBase64Image(currentUrl);
+
+  return (
+    <img
+      src={base64Url!}
+      onError={() => {
+        if (!useFallback) setUseFallback(true);
+      }}
+      alt="Adventurer"
+      className="h-28 w-28 object-contain"
+      style={{ imageRendering: "pixelated" }}
+    />
   );
 }
