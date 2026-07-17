@@ -20,8 +20,9 @@ export default function Hasil() {
   const categoryResults = useAppStore(state => state.categoryResults);
   const gender = useAppStore(state => state.gender);
   const setGuide = useAppStore(state => state.setGuide);
+  const resetAll = useAppStore(state => state.resetAll);
   
-  const onRestart = () => navigate("/landing");
+  const onRestart = () => { resetAll(); navigate("/landing"); };
   const onShare = () => navigate("/koneksi");
   const onChat = (id?: string) => {
     if (id) setGuide(id);
@@ -78,7 +79,7 @@ export default function Hasil() {
             // Ignore AbortError (user cancelled share)
             if (shareErr.name !== 'AbortError') {
               console.error("Gagal share ke aplikasi:", shareErr);
-              fallbackDownload(canvas, fileName);
+              fallbackDownload(dataUrl, fileName);
             }
           }
         } else {

@@ -78,6 +78,8 @@ export function computeMBTI(answers: QuizAnswers): CategoryResult {
     E: [], I: [], S: [], N: [], T: [], F: [], J: [], P: [],
   };
 
+  let mcIndex = 0;
+  let forcedIndex = 0;
   for (const ans of kepribadianAnswers) {
     if (ans.type === "scale" && ans.scaleVals) {
       const v = ans.scaleVals;
@@ -97,20 +99,65 @@ export function computeMBTI(answers: QuizAnswers): CategoryResult {
     }
 
     if (ans.type === "mc" && ans.mcSel !== undefined) {
-      // MC questions map to T/F, J/P, S/N
       const s = ans.mcSel;
-      if (s === 0) { dims.T.push(8); dims.J.push(6); }
-      if (s === 1) { dims.F.push(8); dims.P.push(6); }
-      if (s === 2) { dims.N.push(7); dims.I.push(5); }
-      if (s === 3) { dims.E.push(6); dims.F.push(5); }
+      switch (mcIndex) {
+        case 0: // Soal 19 - T/F: Respons ke teman bermasalah
+          if (s === 0) dims.T.push(8);                        // Solusi praktis → Thinking
+          if (s === 1) dims.F.push(8);                        // Empati dulu → Feeling
+          if (s === 2) { dims.T.push(5); dims.N.push(6); }   // Pertanyaan mendalam → T+N
+          if (s === 3) { dims.F.push(6); dims.E.push(5); }   // Berbagi pengalaman → F+E
+          break;
+        case 1: // Soal 20 - J/P: Tugas deadline 2 minggu
+          if (s === 0) dims.J.push(8);                        // Jadwal terperinci → Judging
+          if (s === 1) dims.P.push(7);                        // Kerjakan yang menarik → Perceiving
+          if (s === 2) { dims.N.push(6); dims.I.push(5); }   // Riset dulu → N+I
+          if (s === 3) dims.P.push(8);                        // Tunggu deadline → Perceiving
+          break;
+        case 2: // Soal 21 - T/F + S/N: Mengambil keputusan penting
+          if (s === 0) { dims.T.push(8); dims.S.push(5); }   // Logika & data → T+S
+          if (s === 1) dims.F.push(8);                        // Perasaan & nilai → Feeling
+          if (s === 2) { dims.N.push(7); dims.F.push(5); }   // Intuisi & firasat → N+F
+          if (s === 3) { dims.S.push(6); dims.E.push(5); }   // Pengalaman orang lain → S+E
+          break;
+        case 3: // Soal 22 - E/I + J/P: Hari Sabtu kosong
+          if (s === 0) dims.J.push(8);                        // Kegiatan direncanakan → Judging
+          if (s === 1) { dims.P.push(7); dims.E.push(6); }   // Spontan pergi → P+E
+          if (s === 2) dims.I.push(8);                        // Istirahat recharge → Introversion
+          if (s === 3) { dims.E.push(8); dims.P.push(5); }   // Teman & eksplorasi → E+P
+          break;
+        case 4: // Soal 25 - Agreeableness: Konflik kelompok
+          if (s === 0) dims.F.push(7);                        // Mediator → Feeling
+          if (s === 1) dims.T.push(7);                        // Advokat → Thinking
+          if (s === 2) dims.I.push(6);                        // Pengamat diam → Introversion
+          if (s === 3) { dims.E.push(7); dims.T.push(5); }   // Pemimpin → E+T
+          break;
+        case 5: // Soal 26 - T/F: Teman minta bantuan saat sibuk
+          if (s === 0) dims.F.push(8);                        // Langsung bantu → Feeling
+          if (s === 1) { dims.T.push(6); dims.J.push(5); }   // Tolak + tawarkan lain → T+J
+          if (s === 2) dims.P.push(5);                        // Setengah-setengah → Perceiving
+          if (s === 3) { dims.T.push(7); dims.N.push(5); }   // Tanya urgensi → T+N
+          break;
+      }
+      mcIndex++;
     }
 
     if (ans.type === "forced" && ans.forcedSel) {
-      if (ans.forcedSel === "a") {
-        dims.S.push(8); dims.T.push(6);
-      } else {
-        dims.N.push(8); dims.F.push(6);
+      if (forcedIndex === 0) {
+        // Soal 23 - Sensing vs Intuition
+        if (ans.forcedSel === "a") dims.S.push(8);   // Fakta & pengalaman → Sensing
+        else dims.N.push(8);                          // Pola & kemungkinan → Intuition
+      } else if (forcedIndex === 1) {
+        // Soal 24 - Neuroticism (bukan S/N!)
+        // Korelasi ringan: bukan dimensi MBTI langsung
+        if (ans.forcedSel === "a") {
+          dims.N.push(5);  // Overthinker sedikit lebih N
+          dims.P.push(4);  // Dan sedikit lebih P
+        } else {
+          dims.S.push(4);  // Santai sedikit lebih S
+          dims.J.push(4);  // Dan sedikit lebih J
+        }
       }
+      forcedIndex++;
     }
   }
 
@@ -171,6 +218,7 @@ export function getAvatarForMBTI(mbtiCode: string, gender: "male" | "female" | "
     ESFJ: ["male"],
     ISTP: ["spirit"],
     ISFP: ["female"],
+    ESFP: ["spirit"],
   };
 
   const hasMockup = generatedMockups[mbtiCode]?.includes(gender);
@@ -228,6 +276,8 @@ export function computeRIASEC(answers: QuizAnswers): CategoryResult {
   const karirAnswers = getAnswersByCat(answers, "karir");
   const scores: Record<string, number[]> = { R: [], I: [], A: [], S: [], E: [], C: [] };
 
+  let mcIndex = 0;
+  let forcedIndex = 0;
   for (const ans of karirAnswers) {
     if (ans.type === "scale" && ans.scaleVals) {
       const v = ans.scaleVals;
@@ -248,35 +298,64 @@ export function computeRIASEC(answers: QuizAnswers): CategoryResult {
     }
 
     if (ans.type === "mc" && ans.mcSel !== undefined) {
-      // MC soal 11: R/I(0), A(1), S(2), E(3)
-      // MC soal 12: I(0), A(1), S(2), E(3)
-      // MC soal 17: A/I(0), C(1), S(2), E(3)
       const s = ans.mcSel;
-      if (s === 0) { scores.I.push(8); scores.R.push(6); }
-      if (s === 1) { scores.A.push(8); }
-      if (s === 2) { scores.S.push(8); }
-      if (s === 3) { scores.E.push(8); }
+      switch (mcIndex) {
+        case 0: // Soal 11 - Proyek impian
+          if (s === 0) { scores.R.push(6); scores.I.push(7); } // Sistem teknologi → R+I
+          if (s === 1) { scores.A.push(7); scores.E.push(5); } // Kampanye kreatif → A+E
+          if (s === 2) scores.S.push(8);                        // Program sosial → S
+          if (s === 3) scores.E.push(8);                        // Bisnis dari nol → E
+          break;
+        case 1: // Soal 12 - Peran dalam tim
+          if (s === 0) scores.I.push(8);  // Analis data → Investigative
+          if (s === 1) scores.A.push(8);  // Kreator konten → Artistic
+          if (s === 2) scores.S.push(8);  // Fasilitator → Social
+          if (s === 3) scores.E.push(8);  // Leader → Enterprising
+          break;
+        case 2: // Soal 17 - Lingkungan kerja
+          if (s === 0) { scores.A.push(6); scores.I.push(6); } // Tantangan baru → A+I
+          if (s === 1) scores.C.push(8);                        // Terstruktur → Conventional
+          if (s === 2) scores.S.push(8);                        // Kolaboratif → Social
+          if (s === 3) scores.E.push(8);                        // Kompetitif → Enterprising
+          break;
+      }
+      mcIndex++;
     }
 
     if (ans.type === "forced" && ans.forcedSel) {
-      // Forced soal 22: S(a) vs I/R(b)
-      // Forced soal 23: A(a) vs C(b)
-      if (ans.forcedSel === "a") {
-        scores.S.push(7);
-        scores.A.push(6);
-      } else {
-        scores.R.push(6);
-        scores.C.push(7);
+      if (forcedIndex === 0) {
+        // Soal 22 - People vs Things
+        if (ans.forcedSel === "a") {
+          scores.S.push(8);  // Bekerja DENGAN orang → Social
+        } else {
+          scores.R.push(6);  // Bekerja PADA sesuatu → Realistic
+          scores.I.push(6);  // + Investigative
+        }
+      } else if (forcedIndex === 1) {
+        // Soal 23 - Kreatif vs Efisien
+        if (ans.forcedSel === "a") {
+          scores.A.push(8);  // Orisinal & ekspresif → Artistic
+        } else {
+          scores.C.push(7);  // Optimasi sistem → Conventional
+          scores.R.push(5);  // + Realistic
+        }
       }
+      forcedIndex++;
     }
 
     if (ans.type === "rank" && ans.rankOrder) {
-      // Ranking: top items get more weight
-      // Order maps to: A(0), C(1), S(2), E(3), I(4), E(5)
-      const rankMap = ["A", "C", "S", "E", "I", "E"];
-      ans.rankOrder.forEach((_, idx) => {
+      // Map item content → RIASEC dimension (not position!)
+      const RANK_ITEM_MAP: Record<string, string> = {
+        "Kebebasan berkreasi tanpa batasan": "A",
+        "Stabilitas dan keamanan karir": "C",
+        "Dampak sosial yang nyata": "S",
+        "Penghasilan dan status tinggi": "E",
+        "Kemajuan ilmu dan pengetahuan": "I",
+        "Memimpin dan punya pengaruh": "E",
+      };
+      ans.rankOrder.forEach((item, idx) => {
         const weight = 10 - idx * 1.5;
-        const dim = rankMap[idx];
+        const dim = RANK_ITEM_MAP[item];
         if (dim) scores[dim].push(weight);
       });
     }
@@ -328,28 +407,30 @@ export function computeFinancial(answers: QuizAnswers): CategoryResult {
 
   const dims = { avoidance: [] as number[], worship: [] as number[], status: [] as number[], vigilance: [] as number[], planning: [] as number[], spending: [] as number[] };
 
+  let finScaleIndex = 0;
   for (const ans of finAnswers) {
     if (ans.type === "scale" && ans.scaleVals) {
       const v = ans.scaleVals;
-      if (v.length === 10) {
-        // Batch 1: Money Scripts
+      if (finScaleIndex === 0) {
+        // Batch 1: Money Scripts (10 items)
         // 1-Avoidance, 2-Worship, 3-Avoidance, 4-Worship, 5-Avoidance, 6-Status, 7-Avoidance, 8-Status, 9-Worship, 10-Status
         dims.avoidance.push(v[0], v[2], v[4], v[6]);
         dims.worship.push(v[1], v[3], v[8]);
         dims.status.push(v[5], v[7], v[9]);
-      } else if (v.length === 4) {
-        // Batch 2: Vigilance/Planning
+      } else if (finScaleIndex === 1) {
+        // Batch 2: Vigilance/Planning (4 items)
         // 1-Vigilance, 2-Planning, 3-Spending(reverse), 4-Planning
         dims.vigilance.push(v[0]);
         dims.planning.push(v[1], v[3]);
         dims.spending.push(v[2]);
-      } else if (v.length === 4) {
-        // Batch 3: Spending/Security
+      } else if (finScaleIndex === 2) {
+        // Batch 3: Spending/Security (4 items)
         // 1-Spending, 2-Vigilance, 3-Planning, 4-Spending
         dims.spending.push(v[0], v[3]);
         dims.vigilance.push(v[1]);
         dims.planning.push(v[2]);
       }
+      finScaleIndex++;
     }
 
     if (ans.type === "mc" && ans.mcSel !== undefined) {
@@ -415,14 +496,21 @@ export function computeVARK(answers: QuizAnswers): CategoryResult {
   const belajarAnswers = getAnswersByCat(answers, "belajar");
   const scores: Record<string, number> = { V: 0, A: 0, R: 0, K: 0 };
 
-  // MC mapping: each MC answer maps to V(0), A(1), R(2), K(3)
+  // Per-question VARK mappings: first 3 questions have non-standard option order
+  const VARK_MC_MAPS: Record<number, string[]> = {
+    0: ["K", "V", "R", "A"], // Soal 1: Coba-coba(K), Video(V), Baca(R), Teman jelaskan(A)
+    1: ["V", "A", "K", "R"], // Soal 2: Pemandangan(V), Suara(A), Fisik(K), Cerita(R)
+    2: ["V", "K", "R", "A"], // Soal 3: Video(V), Praktik(K), Baca(R), Diskusi(A)
+  };
+  const VARK_DEFAULT = ["V", "A", "R", "K"]; // Soal 4-12: standard order
+
+  let varkMcIndex = 0;
   for (const ans of belajarAnswers) {
     if (ans.type === "mc" && ans.mcSel !== undefined) {
-      const s = ans.mcSel;
-      if (s === 0) scores.V += 1;
-      if (s === 1) scores.A += 1;
-      if (s === 2) scores.R += 1;
-      if (s === 3) scores.K += 1;
+      const mapping = VARK_MC_MAPS[varkMcIndex] || VARK_DEFAULT;
+      const dim = mapping[ans.mcSel];
+      if (dim) scores[dim] += 1;
+      varkMcIndex++;
     }
 
     if (ans.type === "scale" && ans.scaleVals) {
@@ -504,8 +592,9 @@ export function computeAttachment(answers: QuizAnswers): CategoryResult {
   const anxietyAvg = avg(anxietyScores);
   const avoidanceAvg = avg(avoidanceScores);
 
-  // Midpoint is 5.5 on 1-10 scale
-  const midpoint = 5.5;
+  // Midpoint raised to 6.0 — cultural calibration for Indonesian context
+  // 5.5 was too sensitive: normal/healthy people scored just above it
+  const midpoint = 6.0;
   let type: AttachmentType;
 
   if (anxietyAvg < midpoint && avoidanceAvg < midpoint) {

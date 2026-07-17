@@ -61,7 +61,7 @@ type ShareCardProps = {
   gender: Gender | null;
 };
 
-function useBase64Image(url) {
+function useBase64Image(url: string) {
   const [base64, setBase64] = React.useState("");
   React.useEffect(() => {
     if (!url) return;

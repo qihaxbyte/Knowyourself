@@ -53,7 +53,7 @@ function ScaleSlider({
         type="range"
         min={1}
         max={10}
-        step={0.01}
+        step={1}
         value={localVal}
         onChange={handleChange}
         onPointerDown={onInteract}
